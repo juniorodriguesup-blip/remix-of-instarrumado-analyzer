@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo-instarrumado.png";
 
 const HeroSection = () => {
   return (
@@ -23,7 +24,7 @@ const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 text-center max-w-4xl">
         {/* Logo */}
         <div className="mb-8 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <span className="text-2xl md:text-3xl font-bold gradient-text">Instarrumado</span>
+          <img src={logo} alt="Instarrumado" className="h-12 md:h-16 mx-auto" />
         </div>
         
         {/* Main Title */}
