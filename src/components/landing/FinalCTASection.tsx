@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { Link } from "react-router-dom";
 const FinalCTASection = () => {
   return (
     <section className="py-20 md:py-32 relative overflow-hidden">
@@ -33,11 +33,14 @@ const FinalCTASection = () => {
             </p>
             
             <Button 
+              asChild
               size="lg" 
               className="btn-gradient text-lg md:text-xl px-10 md:px-14 py-6 md:py-8 h-auto animate-pulse-glow group"
             >
-              <Search className="mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:scale-110 transition-transform" />
-              Analisar meu perfil agora
+              <Link to="/diagnostico">
+                <Search className="mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:scale-110 transition-transform" />
+                Analisar meu perfil agora
+              </Link>
             </Button>
           </div>
           
