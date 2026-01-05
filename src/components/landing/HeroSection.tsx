@@ -1,6 +1,6 @@
 import { Search, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { Link } from "react-router-dom";
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -59,11 +59,14 @@ const HeroSection = () => {
           style={{ animationDelay: "0.6s" }}
         >
           <Button 
+            asChild
             size="lg" 
             className="btn-gradient text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 h-auto animate-pulse-glow group"
           >
-            <Search className="mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:scale-110 transition-transform" />
-            Analisar meu perfil agora
+            <Link to="/diagnostico">
+              <Search className="mr-3 h-5 w-5 md:h-6 md:w-6 group-hover:scale-110 transition-transform" />
+              Analisar meu perfil agora
+            </Link>
           </Button>
           <p className="mt-4 text-sm text-muted-foreground">
             sem cartão • leva menos de 1 minuto
