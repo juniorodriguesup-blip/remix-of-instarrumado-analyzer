@@ -73,7 +73,7 @@ const Diagnostico = () => {
       {step === "result" && (
         <>
           <DiagnosticoWarning />
-          <DiagnosticoResult isPremium={isPremium} />
+          <DiagnosticoResult isPremium={isPremium} formData={formData!} />
           {!isPremium && (
             <>
               <DiagnosticoPaywall />
