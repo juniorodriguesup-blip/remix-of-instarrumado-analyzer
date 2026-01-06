@@ -1,1 +1,7 @@
 project_id = "epwjkiglnrfultqanykm"
+
+[functions.generate-diagnostico]
+verify_jwt = false
+
+[functions.eduzz-webhook]
+verify_jwt = false
