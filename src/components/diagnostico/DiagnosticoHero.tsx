@@ -14,7 +14,7 @@ const DiagnosticoHero = () => {
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
           <Instagram className="h-10 w-10 md:h-12 md:w-12 text-instagram-pink" />
-          <span className="text-3xl md:text-4xl font-bold gradient-text">InstaRrumado</span>
+          <span className="text-3xl md:text-4xl font-bold gradient-text">Instarrumado</span>
         </div>
 
         {/* Title */}
