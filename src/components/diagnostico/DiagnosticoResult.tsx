@@ -1,4 +1,8 @@
-const DiagnosticoResult = () => {
+interface DiagnosticoResultProps {
+  isPremium?: boolean;
+}
+
+const DiagnosticoResult = ({ isPremium = false }: DiagnosticoResultProps) => {
   return (
     <section className="py-12 md:py-16">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -7,7 +11,9 @@ const DiagnosticoResult = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Diagnóstico Estratégico
           </h2>
-          <p className="text-muted-foreground">Perfil Público (Exemplo)</p>
+          <p className="text-muted-foreground">
+            {isPremium ? "Seu Diagnóstico Real" : "Perfil Público (Exemplo)"}
+          </p>
         </div>
 
         {/* Diagnosis content */}
@@ -34,23 +40,27 @@ const DiagnosticoResult = () => {
             </p>
 
             <p className="text-foreground font-medium text-lg border-l-4 border-instagram-pink pl-4">
-              Como este é um acesso gratuito, aponto apenas as falhas estruturais mais graves. O plano completo de correção estratégica permanece restrito ao acesso premium."
+              {isPremium
+                ? "Agora você tem acesso ao plano completo de correção estratégica. Explore as seções abaixo para transformar seu perfil."
+                : "Como este é um acesso gratuito, aponto apenas as falhas estruturais mais graves. O plano completo de correção estratégica permanece restrito ao acesso premium.\""}
             </p>
           </div>
         </div>
 
-        {/* Psychological break */}
-        <div className="mt-12 text-center space-y-4">
-          <p className="text-2xl md:text-3xl font-bold gradient-text">
-            Agora imagine esse nível de análise aplicado AO SEU PERFIL.
-          </p>
-          <p className="text-lg text-muted-foreground">
-            O que você leu acima é apenas a superfície.
-          </p>
-          <p className="text-instagram-pink font-medium text-lg">
-            O plano prático de correção não está disponível no acesso gratuito.
-          </p>
-        </div>
+        {/* Psychological break - only show for free users */}
+        {!isPremium && (
+          <div className="mt-12 text-center space-y-4">
+            <p className="text-2xl md:text-3xl font-bold gradient-text">
+              Agora imagine esse nível de análise aplicado AO SEU PERFIL.
+            </p>
+            <p className="text-lg text-muted-foreground">
+              O que você leu acima é apenas a superfície.
+            </p>
+            <p className="text-instagram-pink font-medium text-lg">
+              O plano prático de correção não está disponível no acesso gratuito.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
