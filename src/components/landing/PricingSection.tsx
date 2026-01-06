@@ -1,7 +1,9 @@
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const PricingSection = () => {
+  const navigate = useNavigate();
   const freePlan = {
     name: "FREE",
     subtitle: "Diagnóstico Essencial",
@@ -66,7 +68,11 @@ const PricingSection = () => {
                 ))}
               </ul>
               
-              <Button variant="outline" className="w-full py-6 text-lg">
+              <Button 
+                variant="outline" 
+                className="w-full py-6 text-lg"
+                onClick={() => navigate("/auth")}
+              >
                 Começar grátis
               </Button>
             </div>
@@ -106,7 +112,10 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <Button className="btn-gradient w-full py-6 text-lg animate-pulse-glow">
+                <Button 
+                  className="btn-gradient w-full py-6 text-lg animate-pulse-glow"
+                  onClick={() => navigate("/auth")}
+                >
                   <Sparkles className="w-5 h-5 mr-2" />
                   Desbloquear versão Premium
                 </Button>
