@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const DiagnosticoCTA = () => {
   const handlePayment = () => {
-    // Eduzz checkout link will be configured here
-    window.open("https://eduzz.com", "_blank");
+    window.open("https://chk.eduzz.com/Z0B5GJA4WA", "_blank");
   };
 
   return (
