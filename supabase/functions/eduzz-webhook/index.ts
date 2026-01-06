@@ -15,43 +15,65 @@ serve(async (req) => {
   try {
     console.log("Eduzz webhook received");
     
-    // Get webhook token for validation
-    const webhookToken = Deno.env.get("EDUZZ_WEBHOOK_TOKEN");
-    
     // Parse request body
     const body = await req.json();
     console.log("Webhook payload:", JSON.stringify(body));
 
-    // Validate webhook token if provided in headers
-    const authHeader = req.headers.get("x-api-key") || req.headers.get("authorization");
-    if (webhookToken && authHeader !== webhookToken && authHeader !== `Bearer ${webhookToken}`) {
-      console.error("Invalid webhook token");
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Detect API format and extract data
+    let customerEmail: string | null = null;
+    let isPaid = false;
+    let transactionId: string | null = null;
+
+    // New Eduzz API format (myeduzz webhooks)
+    if (body.event && body.data) {
+      console.log("Detected new Eduzz API format");
+      const { event, data } = body;
+      
+      // Extract email from buyer object
+      customerEmail = data?.buyer?.email?.toLowerCase().trim();
+      transactionId = data?.id || body.id;
+      
+      // Check for payment confirmed events
+      // Events: myeduzz.invoice_paid, myeduzz.sale_paid, myeduzz.invoice_paid_by_pix, etc.
+      const paidEvents = [
+        "myeduzz.invoice_paid",
+        "myeduzz.sale_paid", 
+        "myeduzz.invoice_paid_by_pix",
+        "myeduzz.invoice_paid_by_credit_card",
+        "myeduzz.invoice_paid_by_billet",
+        "myeduzz.subscription_paid"
+      ];
+      
+      isPaid = paidEvents.includes(event) || data?.status === "paid";
+      
+      console.log(`New API - Event: ${event}, Status: ${data?.status}, Email: ${customerEmail}`);
+    } 
+    // Legacy Eduzz API format
+    else if (body.trans_status !== undefined) {
+      console.log("Detected legacy Eduzz API format");
+      customerEmail = body.cus_email?.toLowerCase().trim();
+      transactionId = body.trans_cod;
+      // Status 3 = Paid in legacy API
+      isPaid = body.trans_status === 3 || body.trans_status === "3";
+      
+      console.log(`Legacy API - Status: ${body.trans_status}, Email: ${customerEmail}`);
     }
 
-    // Eduzz webhook payload structure
-    // Common fields: trans_status, cus_email, trans_cod, prod_name
-    const { trans_status, cus_email, trans_cod } = body;
+    console.log(`Transaction ${transactionId} - Paid: ${isPaid} - Email: ${customerEmail}`);
 
-    console.log(`Transaction ${trans_cod} - Status: ${trans_status} - Email: ${cus_email}`);
-
-    // Only process if payment is confirmed (status 3 = paid/completed)
-    // Eduzz status codes: 1=Open, 3=Paid, 4=Cancelled, 6=Waiting Payment, 7=Refunded
-    if (trans_status !== 3 && trans_status !== "3") {
-      console.log(`Transaction ${trans_cod} not paid yet, status: ${trans_status}`);
+    // Only process if payment is confirmed
+    if (!isPaid) {
+      console.log(`Transaction ${transactionId} not paid yet`);
       return new Response(JSON.stringify({ 
         success: true, 
-        message: "Webhook received, but transaction not paid" 
+        message: "Webhook received, but transaction not paid yet" 
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (!cus_email) {
+    if (!customerEmail) {
       console.error("No customer email provided");
       return new Response(JSON.stringify({ error: "No customer email provided" }), {
         status: 400,
@@ -69,21 +91,21 @@ serve(async (req) => {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("user_id")
-      .eq("email", cus_email.toLowerCase().trim())
+      .eq("email", customerEmail)
       .single();
 
     if (profileError || !profile) {
-      console.error("User not found for email:", cus_email, profileError);
+      console.error("User not found for email:", customerEmail, profileError);
       return new Response(JSON.stringify({ 
         error: "User not found", 
-        email: cus_email 
+        email: customerEmail 
       }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Found user ${profile.user_id} for email ${cus_email}`);
+    console.log(`Found user ${profile.user_id} for email ${customerEmail}`);
 
     // Update subscription status to premium
     const { error: updateError } = await supabase
