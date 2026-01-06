@@ -156,3 +156,6 @@
     background-position: 0% 50%;
   }
 }
+#lovable-badge {
+display: none !important;
+}
