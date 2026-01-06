@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
+import { Instagram } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -77,9 +78,10 @@ const Auth = () => {
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex items-center justify-center gap-3">
+          <Instagram className="h-8 w-8 md:h-10 md:w-10 text-instagram-pink" />
           <h1 className="text-3xl md:text-4xl font-bold">
-            <span className="gradient-text">InstaRrumado</span>
+            <span className="gradient-text">Instarrumado</span>
           </h1>
         </div>
 
