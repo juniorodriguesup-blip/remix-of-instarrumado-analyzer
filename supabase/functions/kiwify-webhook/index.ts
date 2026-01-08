@@ -13,60 +13,40 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Eduzz webhook received");
+    console.log("Kiwify webhook received");
+    
+    // Validate webhook token
+    const url = new URL(req.url);
+    const tokenParam = url.searchParams.get("token");
+    const expectedToken = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
+    
+    if (!tokenParam || tokenParam !== expectedToken) {
+      console.error("Invalid webhook token");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     // Parse request body
     const body = await req.json();
     console.log("Webhook payload:", JSON.stringify(body));
 
-    // Detect API format and extract data
-    let customerEmail: string | null = null;
-    let isPaid = false;
-    let transactionId: string | null = null;
+    // Extract data from Kiwify payload
+    // Kiwify sends: order_status, Customer.email, etc.
+    const orderStatus = body.order_status;
+    const customerEmail = body.Customer?.email?.toLowerCase().trim();
+    const orderId = body.order_id;
 
-    // New Eduzz API format (myeduzz webhooks)
-    if (body.event && body.data) {
-      console.log("Detected new Eduzz API format");
-      const { event, data } = body;
-      
-      // Extract email from buyer object
-      customerEmail = data?.buyer?.email?.toLowerCase().trim();
-      transactionId = data?.id || body.id;
-      
-      // Check for payment confirmed events
-      // Events: myeduzz.invoice_paid, myeduzz.sale_paid, myeduzz.invoice_paid_by_pix, etc.
-      const paidEvents = [
-        "myeduzz.invoice_paid",
-        "myeduzz.sale_paid", 
-        "myeduzz.invoice_paid_by_pix",
-        "myeduzz.invoice_paid_by_credit_card",
-        "myeduzz.invoice_paid_by_billet",
-        "myeduzz.subscription_paid"
-      ];
-      
-      isPaid = paidEvents.includes(event) || data?.status === "paid";
-      
-      console.log(`New API - Event: ${event}, Status: ${data?.status}, Email: ${customerEmail}`);
-    } 
-    // Legacy Eduzz API format
-    else if (body.trans_status !== undefined) {
-      console.log("Detected legacy Eduzz API format");
-      customerEmail = body.cus_email?.toLowerCase().trim();
-      transactionId = body.trans_cod;
-      // Status 3 = Paid in legacy API
-      isPaid = body.trans_status === 3 || body.trans_status === "3";
-      
-      console.log(`Legacy API - Status: ${body.trans_status}, Email: ${customerEmail}`);
-    }
+    console.log(`Order ${orderId} - Status: ${orderStatus} - Email: ${customerEmail}`);
 
-    console.log(`Transaction ${transactionId} - Paid: ${isPaid} - Email: ${customerEmail}`);
-
-    // Only process if payment is confirmed
-    if (!isPaid) {
-      console.log(`Transaction ${transactionId} not paid yet`);
+    // Only process if payment is approved
+    // Kiwify statuses: paid, waiting_payment, refused, refunded, chargedback
+    if (orderStatus !== "paid") {
+      console.log(`Order ${orderId} not paid yet, status: ${orderStatus}`);
       return new Response(JSON.stringify({ 
         success: true, 
-        message: "Webhook received, but transaction not paid yet" 
+        message: "Webhook received, but order not paid yet" 
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

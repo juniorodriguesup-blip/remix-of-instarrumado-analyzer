@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const DiagnosticoCTA = () => {
   const handlePayment = () => {
-    window.open("https://chk.eduzz.com/Z0B5GJA4WA", "_blank");
+    window.open("https://pay.kiwify.com.br/6n0HjlG", "_blank");
   };
 
   return (
@@ -37,7 +37,7 @@ const DiagnosticoCTA = () => {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>Eduzz Verified</span>
+            <span>Pagamento Seguro</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-500" />
