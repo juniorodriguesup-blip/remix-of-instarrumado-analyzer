@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Diagnostico from "./pages/Diagnostico";
 import Auth from "./pages/Auth";
 import EntregaPremium from "./pages/EntregaPremium";
+import AcessoPremium from "./pages/AcessoPremium";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/diagnostico" element={<Diagnostico />} />
             <Route path="/entrega-premium" element={<EntregaPremium />} />
+            <Route path="/acesso-vip" element={<AcessoPremium />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
