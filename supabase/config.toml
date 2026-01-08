@@ -3,5 +3,5 @@ project_id = "epwjkiglnrfultqanykm"
 [functions.generate-diagnostico]
 verify_jwt = false
 
-[functions.eduzz-webhook]
+[functions.kiwify-webhook]
 verify_jwt = false
