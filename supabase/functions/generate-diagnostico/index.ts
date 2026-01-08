@@ -1,9 +1,36 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const inputSchema = z.object({
+  instagram: z.string()
+    .min(1, "Instagram handle required")
+    .max(30, "Instagram handle too long")
+    .regex(/^@?[a-zA-Z0-9._]+$/, "Invalid Instagram handle format"),
+  tipo: z.enum(["criador", "empreendedor", "profissional", "politico", "outro"]),
+  nicho: z.string()
+    .min(2, "Nicho too short")
+    .max(100, "Nicho too long"),
+  objetivo: z.string()
+    .min(5, "Objetivo too short")
+    .max(200, "Objetivo too long"),
+  isPremium: z.boolean().optional().default(false),
+});
+
+// Sanitize input for AI prompt to prevent prompt injection
+function sanitizeForPrompt(input: string): string {
+  return input
+    .replace(/[<>"`]/g, "") // Remove potential injection chars
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim()
+    .substring(0, 200); // Hard limit
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,7 +38,56 @@ serve(async (req) => {
   }
 
   try {
-    const { instagram, tipo, nicho, objetivo, isPremium } = await req.json();
+    // Validate JWT authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      console.error("Missing or invalid authorization header");
+      return new Response(JSON.stringify({ error: "Não autorizado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Create Supabase client to validate the token
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Validate user token using getClaims
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error("Invalid token:", claimsError);
+      return new Response(JSON.stringify({ error: "Token inválido" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+    console.log(`Authenticated request from user: ${userId}`);
+
+    // Parse and validate input
+    const rawInput = await req.json();
+    const validation = inputSchema.safeParse(rawInput);
+    
+    if (!validation.success) {
+      console.error("Validation failed:", validation.error.issues);
+      return new Response(JSON.stringify({ 
+        error: "Dados inválidos", 
+        details: validation.error.issues.map(i => i.message)
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { instagram, tipo, nicho, objetivo, isPremium } = validation.data;
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -27,6 +103,11 @@ serve(async (req) => {
     };
 
     const tipoLabel = tipoLabels[tipo] || tipo;
+
+    // Sanitize inputs before using in prompt
+    const safeInstagram = sanitizeForPrompt(instagram);
+    const safeNicho = sanitizeForPrompt(nicho);
+    const safeObjetivo = sanitizeForPrompt(objetivo);
 
     const systemPrompt = `Você é um estrategista digital especialista em Instagram e posicionamento de marca pessoal. 
 Sua tarefa é analisar perfis e fornecer diagnósticos estratégicos personalizados.
@@ -59,12 +140,12 @@ PARA USUÁRIO GRATUITO:
     const userPrompt = `Analise o seguinte perfil e gere um diagnóstico estratégico personalizado:
 
 PERFIL:
-- Instagram: ${instagram}
+- Instagram: ${safeInstagram}
 - Tipo de perfil: ${tipoLabel}
-- Nicho de atuação: ${nicho}
-- Objetivo principal: ${objetivo}
+- Nicho de atuação: ${safeNicho}
+- Objetivo principal: ${safeObjetivo}
 
-Gere um diagnóstico ESPECÍFICO para este perfil, considerando os desafios típicos de alguém que é ${tipoLabel} no nicho de ${nicho} e quer ${objetivo}.`;
+Gere um diagnóstico ESPECÍFICO para este perfil, considerando os desafios típicos de alguém que é ${tipoLabel} no nicho de ${safeNicho} e quer ${safeObjetivo}.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -105,12 +186,14 @@ Gere um diagnóstico ESPECÍFICO para este perfil, considerando os desafios típ
     const data = await response.json();
     const diagnostico = data.choices?.[0]?.message?.content || "Não foi possível gerar o diagnóstico.";
 
+    console.log(`Diagnostico generated successfully for user ${userId}`);
+
     return new Response(JSON.stringify({ diagnostico }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error in generate-diagnostico:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }), {
+    return new Response(JSON.stringify({ error: "Erro ao processar solicitação" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

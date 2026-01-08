@@ -1,15 +1,34 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Kiwify webhook payload validation schema
+const webhookSchema = z.object({
+  order_status: z.string(),
+  order_id: z.string().optional(),
+  Customer: z.object({
+    email: z.string().email(),
+  }).optional(),
+});
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Only accept POST requests for webhooks
+  if (req.method !== "POST") {
+    console.error(`Invalid method: ${req.method}`);
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -20,25 +39,40 @@ serve(async (req) => {
     const tokenParam = url.searchParams.get("token");
     const expectedToken = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
     
+    if (!expectedToken) {
+      console.error("KIWIFY_WEBHOOK_TOKEN not configured");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
     if (!tokenParam || tokenParam !== expectedToken) {
-      console.error("Invalid webhook token");
+      console.error("Invalid webhook token attempt");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     
-    // Parse request body
-    const body = await req.json();
-    console.log("Webhook payload:", JSON.stringify(body));
+    // Parse and validate request body
+    const rawBody = await req.json();
+    
+    const validation = webhookSchema.safeParse(rawBody);
+    if (!validation.success) {
+      console.error("Invalid webhook payload:", validation.error.issues);
+      return new Response(JSON.stringify({ error: "Invalid payload format" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Extract data from Kiwify payload
-    // Kiwify sends: order_status, Customer.email, etc.
+    const body = validation.data;
     const orderStatus = body.order_status;
     const customerEmail = body.Customer?.email?.toLowerCase().trim();
-    const orderId = body.order_id;
+    const orderId = body.order_id || "unknown";
 
-    console.log(`Order ${orderId} - Status: ${orderStatus} - Email: ${customerEmail}`);
+    console.log(`Order ${orderId} - Status: ${orderStatus} - Email: ${customerEmail ? "provided" : "missing"}`);
 
     // Only process if payment is approved
     // Kiwify statuses: paid, waiting_payment, refused, refunded, chargedback
@@ -54,7 +88,7 @@ serve(async (req) => {
     }
 
     if (!customerEmail) {
-      console.error("No customer email provided");
+      console.error("No customer email provided for paid order");
       return new Response(JSON.stringify({ error: "No customer email provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -64,6 +98,14 @@ serve(async (req) => {
     // Create Supabase client with service role key to bypass RLS
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing Supabase configuration");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -75,17 +117,16 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
-      console.error("User not found for email:", customerEmail, profileError);
+      console.error(`User not found for order ${orderId}`);
       return new Response(JSON.stringify({ 
-        error: "User not found", 
-        email: customerEmail 
+        error: "User not found"
       }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Found user ${profile.user_id} for email ${customerEmail}`);
+    console.log(`Found user for order ${orderId}`);
 
     // Update subscription status to premium
     const { error: updateError } = await supabase
@@ -97,28 +138,26 @@ serve(async (req) => {
       .eq("user_id", profile.user_id);
 
     if (updateError) {
-      console.error("Error updating subscription:", updateError);
+      console.error(`Error updating subscription for order ${orderId}:`, updateError.message);
       return new Response(JSON.stringify({ error: "Failed to update subscription" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Successfully upgraded user ${profile.user_id} to premium`);
+    console.log(`Successfully upgraded subscription for order ${orderId}`);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Subscription upgraded to premium",
-      user_id: profile.user_id
+      message: "Subscription upgraded to premium"
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error: unknown) {
-    console.error("Webhook error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    console.error("Webhook error:", error instanceof Error ? error.message : "Unknown error");
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
