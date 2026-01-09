@@ -37,9 +37,10 @@ const AcessoPremium = () => {
   }, [hasValidToken, user, refreshSubscription]);
 
   useEffect(() => {
-    // Redirect to auth if not logged in
+    // Redirect to auth if not logged in, but preserve the return URL
     if (!authLoading && !user) {
-      navigate("/auth");
+      const currentUrl = `/area-vip${token ? `?token=${token}` : ''}`;
+      navigate(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
       return;
     }
     
@@ -48,7 +49,7 @@ const AcessoPremium = () => {
       toast.error("Acesso exclusivo para usuários Premium");
       navigate("/");
     }
-  }, [user, hasAccess, authLoading, navigate]);
+  }, [user, hasAccess, authLoading, navigate, token]);
 
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
