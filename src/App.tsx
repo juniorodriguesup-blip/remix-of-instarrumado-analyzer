@@ -25,7 +25,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/diagnostico" element={<Diagnostico />} />
             <Route path="/entrega-premium" element={<EntregaPremium />} />
-            <Route path="/acesso-vip" element={<AcessoPremium />} />
+            <Route path="/area-vip" element={<AcessoPremium />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
