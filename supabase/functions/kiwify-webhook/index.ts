@@ -2,11 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
 // Kiwify webhook payload validation schema
 const webhookSchema = z.object({
   order_status: z.string(),
@@ -17,9 +12,9 @@ const webhookSchema = z.object({
 });
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Server-to-server webhook - reject browser preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 405 });
   }
 
   // Only accept POST requests for webhooks
@@ -27,7 +22,7 @@ serve(async (req) => {
     console.error(`Invalid method: ${req.method}`);
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -43,7 +38,7 @@ serve(async (req) => {
       console.error("KIWIFY_WEBHOOK_TOKEN not configured");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
     
@@ -51,7 +46,7 @@ serve(async (req) => {
       console.error("Invalid webhook token attempt");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
     
@@ -63,7 +58,7 @@ serve(async (req) => {
       console.error("Invalid webhook payload:", validation.error.issues);
       return new Response(JSON.stringify({ error: "Invalid payload format" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -83,7 +78,7 @@ serve(async (req) => {
         message: "Webhook received, but order not paid yet" 
       }), {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -91,7 +86,7 @@ serve(async (req) => {
       console.error("No customer email provided for paid order");
       return new Response(JSON.stringify({ error: "No customer email provided" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -103,7 +98,7 @@ serve(async (req) => {
       console.error("Missing Supabase configuration");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
     
@@ -122,7 +117,7 @@ serve(async (req) => {
         error: "User not found"
       }), {
         status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -141,7 +136,7 @@ serve(async (req) => {
       console.error(`Error updating subscription for order ${orderId}:`, updateError.message);
       return new Response(JSON.stringify({ error: "Failed to update subscription" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -152,14 +147,14 @@ serve(async (req) => {
       message: "Subscription upgraded to premium"
     }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
 
   } catch (error: unknown) {
     console.error("Webhook error:", error instanceof Error ? error.message : "Unknown error");
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
     });
   }
 });
