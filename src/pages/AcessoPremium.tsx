@@ -39,7 +39,7 @@ const AcessoPremium = () => {
   useEffect(() => {
     // Redirect to auth if not logged in, but preserve the return URL
     if (!authLoading && !user) {
-      const currentUrl = `/area-vip${token ? `?token=${token}` : ''}`;
+      const currentUrl = `/acesso-vip${token ? `?token=${token}` : ''}`;
       navigate(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
       return;
     }

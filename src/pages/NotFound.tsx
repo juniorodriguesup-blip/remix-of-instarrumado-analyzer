@@ -10,12 +10,12 @@ const NotFound = () => {
     // e.g. /area-vip%3Ftoken%3Dpremium2026
     const rawPath = `${location.pathname}${location.search}`;
 
-    if (rawPath.includes("/area-vip%3Ftoken%3D") || location.pathname.includes("/area-vip?token=")) {
+    if (rawPath.includes("/acesso-vip%3Ftoken%3D") || location.pathname.includes("/acesso-vip?token=")) {
       const decoded = decodeURIComponent(rawPath);
       // Extract token from either decoded pathname or search
       const token = decoded.split("token=")[1]?.split("&")[0];
       if (token) {
-        navigate(`/area-vip?token=${encodeURIComponent(token)}`, { replace: true });
+        navigate(`/acesso-vip?token=${encodeURIComponent(token)}`, { replace: true });
         return;
       }
     }
