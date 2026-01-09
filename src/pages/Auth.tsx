@@ -1,20 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { User, Session } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import { Instagram } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+
+  // Get the redirect URL from query params (used after login)
+  const redirectTo = searchParams.get("redirect") || "/diagnostico";
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -22,7 +26,7 @@ const Auth = () => {
       (event, session) => {
         setSession(session);
         if (session?.user) {
-          navigate("/diagnostico");
+          navigate(redirectTo);
         }
       }
     );
@@ -31,12 +35,12 @@ const Auth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        navigate("/diagnostico");
+        navigate(redirectTo);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectTo]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +59,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/diagnostico`,
+            emailRedirectTo: `${window.location.origin}${redirectTo}`,
           },
         });
         if (error) throw error;
