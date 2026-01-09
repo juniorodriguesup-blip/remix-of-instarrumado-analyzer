@@ -1,7 +1,1 @@
-project_id = "epwjkiglnrfultqanykm"
-
-[functions.generate-diagnostico]
-verify_jwt = false
-
-[functions.kiwify-webhook]
-verify_jwt = false
+project_id = "mtfoepgzudbyqfmtnyok"
