@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Instagram, Sparkles, ShieldCheck, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,12 +16,25 @@ export interface FormData {
 
 const AcessoPremium = () => {
   const navigate = useNavigate();
-  const { user, subscriptionStatus, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { user, subscriptionStatus, loading: authLoading, refreshSubscription } = useAuth();
   const [step, setStep] = useState<"form" | "result">("form");
   const [formData, setFormData] = useState<FormData | null>(null);
 
-  // Only allow access for verified premium users (server-side validated)
-  const hasAccess = subscriptionStatus === "premium";
+  // Check for valid token (used for post-payment redirect from Kiwify)
+  // Token grants temporary access while webhook processes the payment
+  const token = searchParams.get("token");
+  const hasValidToken = token === "premium2026";
+  const isPremiumUser = subscriptionStatus === "premium";
+  const hasAccess = hasValidToken || isPremiumUser;
+
+  useEffect(() => {
+    // If user has valid token, refresh subscription status in background
+    // This ensures the premium status gets updated from the webhook
+    if (hasValidToken && user) {
+      refreshSubscription();
+    }
+  }, [hasValidToken, user, refreshSubscription]);
 
   useEffect(() => {
     // Redirect to auth if not logged in
@@ -30,7 +43,7 @@ const AcessoPremium = () => {
       return;
     }
     
-    // Redirect to home if not a premium subscriber
+    // Redirect to home if no valid access (no token AND not premium)
     if (!authLoading && user && !hasAccess) {
       toast.error("Acesso exclusivo para usuários Premium");
       navigate("/");
