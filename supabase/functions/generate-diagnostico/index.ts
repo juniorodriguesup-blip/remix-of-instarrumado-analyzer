@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Input validation schema
+// Input validation schema - isPremium is determined server-side, not from client
 const inputSchema = z.object({
   instagram: z.string()
     .min(1, "Instagram handle required")
@@ -20,7 +20,6 @@ const inputSchema = z.object({
   objetivo: z.string()
     .min(5, "Objetivo too short")
     .max(200, "Objetivo too long"),
-  isPremium: z.boolean().optional().default(false),
 });
 
 // Sanitize input for AI prompt to prevent prompt injection
@@ -71,6 +70,28 @@ serve(async (req) => {
     const userId = claimsData.claims.sub;
     console.log(`Authenticated request from user: ${userId}`);
 
+    // Query subscription status server-side - never trust client input
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data: subscription, error: subError } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('status')
+      .eq('user_id', userId)
+      .single();
+
+    if (subError) {
+      console.error('Failed to fetch subscription:', subError);
+      return new Response(JSON.stringify({ error: 'Erro ao verificar assinatura' }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Determine premium status server-side
+    const isPremium = subscription?.status === 'premium';
+    console.log(`User ${userId} subscription status: ${isPremium ? 'premium' : 'free'}`);
+
     // Parse and validate input
     const rawInput = await req.json();
     const validation = inputSchema.safeParse(rawInput);
@@ -86,7 +107,7 @@ serve(async (req) => {
       });
     }
 
-    const { instagram, tipo, nicho, objetivo, isPremium } = validation.data;
+    const { instagram, tipo, nicho, objetivo } = validation.data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     

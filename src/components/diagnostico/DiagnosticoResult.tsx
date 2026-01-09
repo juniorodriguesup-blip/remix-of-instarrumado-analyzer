@@ -117,7 +117,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
             tipo: formData.tipo,
             nicho: formData.nicho,
             objetivo: formData.objetivo,
-            isPremium,
+            // isPremium is determined server-side from user's subscription
           },
         });
 

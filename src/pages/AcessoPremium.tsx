@@ -1,27 +1,28 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { Instagram, CheckCircle, Copy, Sparkles, Calendar, MessageSquare, LayoutGrid, FileText, Star, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Instagram, CheckCircle, Copy, Sparkles, Calendar, MessageSquare, LayoutGrid, FileText, Star, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-// Token secreto para acesso direto - só quem pagar recebe este link
-const SECRET_TOKEN = "premium2026";
+import { useAuth } from "@/hooks/useAuth";
 
 const AcessoPremium = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { user, subscriptionStatus, loading: authLoading } = useAuth();
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (token === SECRET_TOKEN) {
-      setIsAuthorized(true);
-    } else {
-      // Token inválido - redireciona para home
+    // Redirect to auth if not logged in
+    if (!authLoading && !user) {
+      navigate("/auth");
+      return;
+    }
+    
+    // Redirect to home if not premium
+    if (!authLoading && user && subscriptionStatus !== "premium") {
+      toast.error("Acesso exclusivo para usuários Premium");
       navigate("/");
     }
-  }, [searchParams, navigate]);
+  }, [user, subscriptionStatus, authLoading, navigate]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -139,7 +140,20 @@ Coluna 1: Educativo | Coluna 2: Pessoal | Coluna 3: Vendas
     }
   ];
 
-  if (!isAuthorized) {
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-instagram-pink mx-auto" />
+          <p className="text-muted-foreground">Verificando acesso...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Don't render if not premium (will redirect)
+  if (!user || subscriptionStatus !== "premium") {
     return null;
   }
 
@@ -238,12 +252,12 @@ Coluna 1: Educativo | Coluna 2: Pessoal | Coluna 3: Vendas
             Quer um diagnóstico <span className="gradient-text">personalizado com IA</span>?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Faça login na plataforma para acessar o diagnóstico completo do seu Instagram.
+            Acesse o diagnóstico completo do seu Instagram.
           </p>
           <Button
             size="lg"
             className="btn-gradient"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/diagnostico")}
           >
             <Sparkles className="h-5 w-5 mr-2" />
             Acessar Diagnóstico Premium
