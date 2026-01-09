@@ -10,9 +10,20 @@ const allowedOrigins = [
   "http://localhost:8080",
 ];
 
+// Check if origin matches allowed patterns
+function isAllowedOrigin(origin: string): boolean {
+  // Check exact matches
+  if (allowedOrigins.includes(origin)) return true;
+  
+  // Allow any *.lovable.app subdomain (for preview environments)
+  if (origin.match(/^https:\/\/[a-z0-9-]+\.lovable\.app$/)) return true;
+  
+  return false;
+}
+
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
-  const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  const allowedOrigin = isAllowedOrigin(origin) ? origin : allowedOrigins[0];
   
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
