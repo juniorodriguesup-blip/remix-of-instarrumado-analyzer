@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, CheckCircle2, Lightbulb, Target, TrendingUp } from "lucide-react";
-import type { FormData } from "@/pages/Diagnostico";
+import type { FormData } from "@/pages/AcessoPremium";
 
 interface DiagnosticoResultProps {
   isPremium?: boolean;
@@ -117,7 +117,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
             tipo: formData.tipo,
             nicho: formData.nicho,
             objetivo: formData.objetivo,
-            // isPremium is determined server-side from user's subscription
+            isPremium: true, // Always premium in this context
           },
         });
 
@@ -139,7 +139,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
     };
 
     generateDiagnostico();
-  }, [formData, isPremium]);
+  }, [formData]);
 
   if (loading) {
     return (
@@ -147,7 +147,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              Gerando seu Diagnóstico...
+              Gerando seu Diagnóstico Completo...
             </h2>
             <p className="text-muted-foreground">
               Analisando @{formData.instagram}
@@ -158,7 +158,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-instagram-pink"></div>
               <p className="text-muted-foreground text-center">
-                Nossa IA está analisando seu perfil e gerando um diagnóstico personalizado...
+                Nossa IA está analisando seu perfil e gerando um diagnóstico completo e personalizado...
               </p>
             </div>
           </div>
@@ -197,7 +197,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-instagram-pink/20 text-instagram-pink px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Target className="w-4 h-4" />
-            {isPremium ? "Diagnóstico Premium" : "Análise Preliminar"}
+            Diagnóstico Premium Completo
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
             Diagnóstico Estratégico
@@ -314,25 +314,6 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
             </div>
           )}
         </div>
-
-        {/* Psychological break - only show for free users */}
-        {!isPremium && (
-          <div className="mt-12 glass-card rounded-2xl p-8 md:p-10 text-center bg-gradient-to-br from-instagram-pink/10 via-instagram-purple/10 to-instagram-orange/10">
-            <div className="inline-flex items-center gap-2 bg-instagram-pink/20 text-instagram-pink px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Lightbulb className="w-4 h-4" />
-              Isso é só o começo...
-            </div>
-            <p className="text-2xl md:text-3xl font-bold gradient-text mb-4">
-              Quer o plano de ação completo para seu perfil?
-            </p>
-            <p className="text-lg text-muted-foreground mb-2">
-              O que você leu acima é apenas uma prévia das falhas identificadas.
-            </p>
-            <p className="text-instagram-pink font-medium text-lg">
-              O diagnóstico completo com estratégias práticas está disponível no acesso premium.
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );

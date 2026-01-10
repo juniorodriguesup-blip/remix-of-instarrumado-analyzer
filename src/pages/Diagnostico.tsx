@@ -1,15 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import DiagnosticoHeader from "@/components/diagnostico/DiagnosticoHeader";
 import DiagnosticoHero from "@/components/diagnostico/DiagnosticoHero";
 import DiagnosticoForm from "@/components/diagnostico/DiagnosticoForm";
 import DiagnosticoWarning from "@/components/diagnostico/DiagnosticoWarning";
-import DiagnosticoResult from "@/components/diagnostico/DiagnosticoResult";
+import DiagnosticoResultPreview from "@/components/diagnostico/DiagnosticoResultPreview";
 import DiagnosticoPaywall from "@/components/diagnostico/DiagnosticoPaywall";
 import DiagnosticoCTA from "@/components/diagnostico/DiagnosticoCTA";
-import FreeBanner from "@/components/diagnostico/FreeBanner";
-import PremiumBanner from "@/components/diagnostico/PremiumBanner";
+import { Instagram } from "lucide-react";
 
 export interface FormData {
   instagram: string;
@@ -20,48 +17,30 @@ export interface FormData {
 
 const Diagnostico = () => {
   const navigate = useNavigate();
-  const { user, loading, subscriptionStatus } = useAuth();
   const [step, setStep] = useState<"form" | "result">("form");
   const [formData, setFormData] = useState<FormData | null>(null);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
-
   const handleFormSubmit = (data: FormData) => {
+    // Salvar dados no localStorage para usar na página premium
+    localStorage.setItem("instarrumado_formData", JSON.stringify(data));
     setFormData(data);
     setStep("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Show loading while checking auth
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-instagram-pink mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </main>
-    );
-  }
-
-  // Redirect if not authenticated
-  if (!user) {
-    return null;
-  }
-
-  const isPremium = subscriptionStatus === "premium";
-
   return (
     <main className="min-h-screen bg-background">
-      <DiagnosticoHeader />
-
-      <div className="container mx-auto px-4 py-8">
-        {isPremium ? <PremiumBanner /> : <FreeBanner />}
-      </div>
+      {/* Simple Header */}
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Instagram className="h-6 w-6 text-instagram-pink" />
+            <h1 className="text-xl font-bold">
+              <span className="gradient-text">Instarrumado</span>
+            </h1>
+          </div>
+        </div>
+      </header>
 
       {step === "form" && (
         <>
@@ -70,16 +49,12 @@ const Diagnostico = () => {
         </>
       )}
 
-      {step === "result" && (
+      {step === "result" && formData && (
         <>
           <DiagnosticoWarning />
-          <DiagnosticoResult isPremium={isPremium} formData={formData!} />
-          {!isPremium && (
-            <>
-              <DiagnosticoPaywall />
-              <DiagnosticoCTA />
-            </>
-          )}
+          <DiagnosticoResultPreview formData={formData} />
+          <DiagnosticoPaywall />
+          <DiagnosticoCTA />
         </>
       )}
     </main>

@@ -110,7 +110,7 @@ const DiagnosticoForm = ({ onSubmit }: DiagnosticoFormProps) => {
             className="w-full h-14 text-lg font-semibold btn-gradient disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Search className="mr-2 h-5 w-5" />
-            Gerar diagnóstico gratuito
+            Analisar meu perfil
           </Button>
         </form>
       </div>
