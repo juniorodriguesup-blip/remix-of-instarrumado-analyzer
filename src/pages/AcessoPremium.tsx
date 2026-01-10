@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { 
-  Instagram, 
-  Sparkles, 
-  ShieldCheck, 
-  Loader2, 
-  CheckCircle, 
+import { useSearchParams } from "react-router-dom";
+import {
+  Instagram,
+  Sparkles,
+  ShieldCheck,
+  Loader2,
+  CheckCircle,
   Crown,
   Gift,
   Zap,
@@ -16,9 +16,7 @@ import {
   Video,
   MessageSquare,
   ArrowRight,
-  AlertCircle
 } from "lucide-react";
-import { toast } from "sonner";
 import DiagnosticoResult from "@/components/diagnostico/DiagnosticoResult";
 import DiagnosticoFormPremium from "@/components/diagnostico/DiagnosticoFormPremium";
 import ManualResult from "@/components/diagnostico/ManualResult";
@@ -64,42 +62,35 @@ const benefitItems = [
 ];
 
 const AcessoPremium = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState<"welcome" | "form" | "result">("welcome");
   const [formData, setFormData] = useState<FormData | null>(null);
-  const [hasAccess, setHasAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for valid token (used for post-payment redirect from Kiwify)
+  // Token pode existir por conta do redirect do checkout, mas esta página é propositalmente "aberta".
+  // A personalização e a entrega do material dependem apenas dos dados do formulário.
   const token = searchParams.get("token");
-  const hasValidToken = token === "premium2026";
 
   useEffect(() => {
-    // Verificar acesso
-    if (hasValidToken) {
-      setHasAccess(true);
-      
-      // Tentar carregar formData do localStorage
-      const savedFormData = localStorage.getItem("instarrumado_formData");
-      if (savedFormData) {
-        try {
-          const parsed = JSON.parse(savedFormData);
-          setFormData(parsed);
-          // Se já tem dados, vai direto pro resultado
-          setStep("result");
-        } catch (e) {
-          console.error("Error parsing saved formData:", e);
-          // Se não conseguiu parsear, vai pro form
-          setStep("form");
-        }
-      } else {
-        // Se não tem dados salvos, vai direto pro formulário (pula welcome)
+    // Sempre tenta carregar formData do localStorage
+    const savedFormData = localStorage.getItem("instarrumado_formData");
+    if (savedFormData) {
+      try {
+        const parsed = JSON.parse(savedFormData);
+        setFormData(parsed);
+        setStep("result");
+      } catch (e) {
+        console.error("Error parsing saved formData:", e);
         setStep("form");
       }
+    } else {
+      // Se não tem dados salvos, vai direto pro formulário
+      // (mantemos o "welcome" só para quem veio do checkout, se quiser)
+      setStep(token ? "welcome" : "form");
     }
+
     setIsLoading(false);
-  }, [hasValidToken]);
+  }, [token]);
 
   const handleFormSubmit = (data: FormData) => {
     // Salvar no localStorage para persistência
@@ -119,51 +110,8 @@ const AcessoPremium = () => {
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-instagram-pink mx-auto" />
-          <p className="text-muted-foreground">Verificando acesso...</p>
+          <p className="text-muted-foreground">Carregando…</p>
         </div>
-      </main>
-    );
-  }
-
-  // Se não tiver acesso ainda, mostramos o formulário mesmo assim (para o usuário preencher)
-  // e avisamos que a liberação do conteúdo depende do token/compra.
-  if (!hasAccess) {
-    return (
-      <main className="min-h-screen bg-background">
-        <section className="py-12 md:py-16 border-b border-border/30">
-          <div className="container mx-auto px-4 text-center">
-            <div className="inline-flex items-center gap-2 bg-instagram-pink/10 border border-instagram-pink/30 rounded-full px-4 py-2 mb-6">
-              <AlertCircle className="h-4 w-4 text-instagram-pink" />
-              <span className="text-sm font-medium text-instagram-pink">Acesso ainda não confirmado</span>
-            </div>
-
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              Preencha seus dados para <span className="gradient-text">personalização</span>
-            </h1>
-
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              Assim que o acesso estiver liberado, você verá o diagnóstico completo + todos os entregáveis premium.
-            </p>
-
-            <div className="mt-8">
-              <button
-                onClick={() => navigate("/diagnostico")}
-                className="btn-gradient px-8 py-4 rounded-xl text-lg font-semibold inline-flex items-center gap-2"
-              >
-                <Target className="h-5 w-5" />
-                Fazer Diagnóstico
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <DiagnosticoFormPremium
-          onSubmit={(data) => {
-            localStorage.setItem("instarrumado_formData", JSON.stringify(data));
-            setFormData(data);
-            toast.error("Acesso VIP não confirmado. Abra o link de obrigado com o token do checkout.");
-          }}
-        />
       </main>
     );
   }
