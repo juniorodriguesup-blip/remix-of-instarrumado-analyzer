@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Instagram, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 const FinalCTASection = () => {
@@ -44,10 +44,45 @@ const FinalCTASection = () => {
             </Button>
           </div>
           
-          {/* Footer Note */}
-          <p className="text-sm text-muted-foreground mt-8">
-            © 2025 Instarrumado. Todos os direitos reservados.
-          </p>
+          {/* Footer with Contact Info */}
+          <div className="mt-16 pt-8 border-t border-border/30">
+            <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mb-6">
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/instarrumado.oficial/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-instagram-pink transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+                <span className="text-sm">@instarrumado.oficial</span>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href="https://wa.me/5511999484196"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-green-500 transition-colors"
+              >
+                <Phone className="h-5 w-5" />
+                <span className="text-sm">+55 11 99948-4196</span>
+              </a>
+
+              {/* Email */}
+              <a
+                href="mailto:suporte@instarrumado.com.br"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Mail className="h-5 w-5" />
+                <span className="text-sm">suporte@instarrumado.com.br</span>
+              </a>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              © 2025 Instarrumado. Todos os direitos reservados.
+            </p>
+          </div>
         </div>
       </div>
     </section>
