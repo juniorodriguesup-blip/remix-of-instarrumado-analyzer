@@ -10,12 +10,19 @@ const NotFound = () => {
     // e.g. /area-vip%3Ftoken%3Dpremium2026
     const rawPath = `${location.pathname}${location.search}`;
 
-    if (rawPath.includes("/acesso-vip%3Ftoken%3D") || location.pathname.includes("/acesso-vip?token=")) {
+    const isVipTokenLink =
+      rawPath.includes("/acesso-vip%3Ftoken%3D") || location.pathname.includes("/acesso-vip?token=");
+
+    const isObrigadoTokenLink =
+      rawPath.includes("/obrigado%3Ftoken%3D") || location.pathname.includes("/obrigado?token=");
+
+    if (isVipTokenLink || isObrigadoTokenLink) {
       const decoded = decodeURIComponent(rawPath);
-      // Extract token from either decoded pathname or search
       const token = decoded.split("token=")[1]?.split("&")[0];
+
       if (token) {
-        navigate(`/acesso-vip?token=${encodeURIComponent(token)}`, { replace: true });
+        const targetPath = isObrigadoTokenLink ? "/obrigado" : "/acesso-vip";
+        navigate(`${targetPath}?token=${encodeURIComponent(token)}`, { replace: true });
         return;
       }
     }
