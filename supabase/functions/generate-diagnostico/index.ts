@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // Allowed origins for CORS - restrict to known domains
@@ -32,7 +31,7 @@ function getCorsHeaders(req: Request): Record<string, string> {
   };
 }
 
-// Input validation schema - isPremium is determined server-side, not from client
+// Input validation schema
 const inputSchema = z.object({
   instagram: z.string()
     .min(1, "Instagram handle required")
@@ -45,6 +44,7 @@ const inputSchema = z.object({
   objetivo: z.string()
     .min(5, "Objetivo too short")
     .max(200, "Objetivo too long"),
+  isPremium: z.boolean().optional().default(false),
 });
 
 // Sanitize input for AI prompt to prevent prompt injection
@@ -64,61 +64,6 @@ serve(async (req) => {
   }
 
   try {
-    // Validate JWT authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.error("Missing or invalid authorization header");
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Create Supabase client to validate the token
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    // Validate user token using getClaims
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    
-    if (claimsError || !claimsData?.claims) {
-      console.error("Invalid token:", claimsError);
-      return new Response(JSON.stringify({ error: "Token inválido" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const userId = claimsData.claims.sub;
-    console.log(`Authenticated request from user: ${userId}`);
-
-    // Query subscription status server-side - never trust client input
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const { data: subscription, error: subError } = await supabaseAdmin
-      .from('user_subscriptions')
-      .select('status')
-      .eq('user_id', userId)
-      .single();
-
-    if (subError) {
-      console.error('Failed to fetch subscription:', subError);
-      return new Response(JSON.stringify({ error: 'Erro ao verificar assinatura' }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Determine premium status server-side
-    const isPremium = subscription?.status === 'premium';
-    console.log(`User ${userId} subscription status: ${isPremium ? 'premium' : 'free'}`);
-
     // Parse and validate input
     const rawInput = await req.json();
     const validation = inputSchema.safeParse(rawInput);
@@ -134,7 +79,7 @@ serve(async (req) => {
       });
     }
 
-    const { instagram, tipo, nicho, objetivo } = validation.data;
+    const { instagram, tipo, nicho, objetivo, isPremium } = validation.data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
@@ -169,15 +114,16 @@ REGRAS IMPORTANTES:
 - Use formatação com parágrafos claros
 
 ${isPremium ? `
-PARA USUÁRIO PREMIUM:
+PARA DIAGNÓSTICO PREMIUM:
 - Forneça análise COMPLETA e DETALHADA
-- Inclua plano de ação com passos específicos
-- Dê exemplos práticos de conteúdo
-- Sugira estratégias avançadas de crescimento
-- Inclua dicas de frequência de postagem, horários, tipos de conteúdo
-- Forneça no mínimo 5 parágrafos detalhados
+- Estruture em seções claras com títulos numerados (use **1. Título:** formato)
+- Para cada problema, inclua:
+  - **Problema:** descrição específica
+  - **Implicação para o Objetivo:** como isso afeta o objetivo do cliente
+- Inclua no mínimo 5 seções completas
+- Seja profundo e estratégico
 ` : `
-PARA USUÁRIO GRATUITO:
+PARA DIAGNÓSTICO GRATUITO:
 - Forneça apenas uma análise SUPERFICIAL das principais falhas
 - Aponte 2-3 problemas críticos de forma breve
 - NÃO forneça soluções detalhadas
@@ -234,7 +180,7 @@ Gere um diagnóstico ESPECÍFICO para este perfil, considerando os desafios típ
     const data = await response.json();
     const diagnostico = data.choices?.[0]?.message?.content || "Não foi possível gerar o diagnóstico.";
 
-    console.log(`Diagnostico generated successfully for user ${userId}`);
+    console.log(`Diagnostico generated successfully (premium: ${isPremium})`);
 
     return new Response(JSON.stringify({ diagnostico }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

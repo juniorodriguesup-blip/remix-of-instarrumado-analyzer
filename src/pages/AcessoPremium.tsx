@@ -15,10 +15,10 @@ import {
   Calendar,
   Video,
   MessageSquare,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
 import DiagnosticoResult from "@/components/diagnostico/DiagnosticoResult";
 import DiagnosticoFormPremium from "@/components/diagnostico/DiagnosticoFormPremium";
 import ManualResult from "@/components/diagnostico/ManualResult";
@@ -66,36 +66,37 @@ const benefitItems = [
 const AcessoPremium = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, subscriptionStatus, loading: authLoading, refreshSubscription } = useAuth();
   const [step, setStep] = useState<"welcome" | "form" | "result">("welcome");
   const [formData, setFormData] = useState<FormData | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for valid token (used for post-payment redirect from Kiwify)
   const token = searchParams.get("token");
   const hasValidToken = token === "premium2026";
-  const isPremiumUser = subscriptionStatus === "premium";
-  const hasAccess = hasValidToken || isPremiumUser;
 
   useEffect(() => {
-    if (hasValidToken && user) {
-      refreshSubscription();
+    // Verificar acesso
+    if (hasValidToken) {
+      setHasAccess(true);
+      
+      // Tentar carregar formData do localStorage
+      const savedFormData = localStorage.getItem("instarrumado_formData");
+      if (savedFormData) {
+        try {
+          const parsed = JSON.parse(savedFormData);
+          setFormData(parsed);
+        } catch (e) {
+          console.error("Error parsing saved formData:", e);
+        }
+      }
     }
-  }, [hasValidToken, user, refreshSubscription]);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      const currentUrl = `/acesso-vip${token ? `?token=${token}` : ''}`;
-      navigate(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
-      return;
-    }
-    
-    if (!authLoading && user && !hasAccess) {
-      toast.error("Acesso exclusivo para usuários Premium");
-      navigate("/");
-    }
-  }, [user, hasAccess, authLoading, navigate, token]);
+    setIsLoading(false);
+  }, [hasValidToken]);
 
   const handleFormSubmit = (data: FormData) => {
+    // Salvar no localStorage para persistência
+    localStorage.setItem("instarrumado_formData", JSON.stringify(data));
     setFormData(data);
     setStep("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,7 +107,7 @@ const AcessoPremium = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (authLoading) {
+  if (isLoading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -117,8 +118,30 @@ const AcessoPremium = () => {
     );
   }
 
-  if (!user || !hasAccess) {
-    return null;
+  if (!hasAccess) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="container mx-auto px-4 max-w-lg text-center">
+          <div className="glass-card rounded-2xl p-8 md:p-12">
+            <AlertCircle className="h-16 w-16 text-instagram-pink mx-auto mb-6" />
+            <h1 className="text-2xl md:text-3xl font-bold mb-4">
+              Acesso Restrito
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              Esta área é exclusiva para clientes que adquiriram o pacote premium.
+              Complete seu diagnóstico gratuito e desbloqueie o acesso completo.
+            </p>
+            <button
+              onClick={() => navigate("/diagnostico")}
+              className="btn-gradient px-8 py-4 rounded-xl text-lg font-semibold inline-flex items-center gap-2"
+            >
+              <Target className="h-5 w-5" />
+              Fazer Diagnóstico Gratuito
+            </button>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -313,7 +336,7 @@ const AcessoPremium = () => {
                 Quer gerar para <span className="gradient-text">outro perfil</span>?
               </h2>
               <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-                Como usuário VIP, você tem acesso ilimitado. Gere diagnósticos e manuais para quantos perfis quiser!
+                Como cliente VIP, você tem acesso ilimitado. Gere diagnósticos e manuais para quantos perfis quiser!
               </p>
               <button
                 onClick={() => {

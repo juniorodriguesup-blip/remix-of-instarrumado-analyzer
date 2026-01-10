@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // Allowed origins for CORS - restrict to known domains
@@ -55,50 +54,6 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Token inválido" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const userId = claimsData.claims.sub;
-
-    // Verify premium status
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const { data: subscription } = await supabaseAdmin
-      .from('user_subscriptions')
-      .select('status')
-      .eq('user_id', userId)
-      .single();
-
-    if (subscription?.status !== 'premium') {
-      return new Response(JSON.stringify({ error: 'Acesso exclusivo para usuários Premium' }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const rawInput = await req.json();
     const validation = inputSchema.safeParse(rawInput);
     
@@ -215,7 +170,7 @@ Todo o conteúdo do manual deve ser específico para esta combinação única.`;
     const data = await response.json();
     const manual = data.choices?.[0]?.message?.content || "Não foi possível gerar o manual.";
 
-    console.log(`Manual generated successfully for user ${userId}`);
+    console.log(`Manual generated successfully`);
 
     return new Response(JSON.stringify({ manual }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
