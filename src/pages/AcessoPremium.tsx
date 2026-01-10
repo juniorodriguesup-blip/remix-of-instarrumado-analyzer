@@ -86,9 +86,16 @@ const AcessoPremium = () => {
         try {
           const parsed = JSON.parse(savedFormData);
           setFormData(parsed);
+          // Se já tem dados, vai direto pro resultado
+          setStep("result");
         } catch (e) {
           console.error("Error parsing saved formData:", e);
+          // Se não conseguiu parsear, vai pro form
+          setStep("form");
         }
+      } else {
+        // Se não tem dados salvos, vai direto pro formulário (pula welcome)
+        setStep("form");
       }
     }
     setIsLoading(false);
