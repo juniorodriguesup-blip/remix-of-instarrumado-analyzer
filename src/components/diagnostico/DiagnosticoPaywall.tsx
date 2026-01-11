@@ -1,12 +1,12 @@
 import { Lock } from "lucide-react";
 
 const paywallItems = [
-  { title: "BIO PRONTA", description: "Desbloquear via Eduzz" },
-  { title: "FUNIL DE DESTAQUES", description: "Desbloquear via Eduzz" },
-  { title: "ESTRATÉGIA VISUAL", description: "Desbloquear via Eduzz" },
-  { title: "CONTEÚDO PARA 7 DIAS", description: "Desbloquear via Eduzz" },
-  { title: "ROTEIROS DE REELS", description: "Desbloquear via Eduzz" },
-  { title: "CONVERSÃO EM VENDAS", description: "Acesso exclusivo" },
+  { title: "BIO PRONTA", description: "Acesso exclusivo Premium" },
+  { title: "FUNIL DE DESTAQUES", description: "Acesso exclusivo Premium" },
+  { title: "ESTRATÉGIA VISUAL", description: "Acesso exclusivo Premium" },
+  { title: "CONTEÚDO PARA 7 DIAS", description: "Acesso exclusivo Premium" },
+  { title: "ROTEIROS DE REELS", description: "Acesso exclusivo Premium" },
+  { title: "CONVERSÃO EM VENDAS", description: "Acesso exclusivo Premium" },
 ];
 
 const DiagnosticoPaywall = () => {
