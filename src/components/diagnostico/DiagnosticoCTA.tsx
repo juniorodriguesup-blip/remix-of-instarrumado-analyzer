@@ -27,9 +27,9 @@ const DiagnosticoCTA = () => {
         {/* CTA Button */}
         <Button
           onClick={handlePayment}
-          className="h-16 px-12 text-xl font-bold btn-gradient animate-pulse-glow"
+          className="h-12 px-6 text-base md:h-16 md:px-12 md:text-xl font-bold btn-gradient animate-pulse-glow w-full max-w-xs md:max-w-none md:w-auto"
         >
-          <Unlock className="mr-3 h-6 w-6" />
+          <Unlock className="mr-2 h-5 w-5 md:mr-3 md:h-6 md:w-6" />
           DESBLOQUEAR TUDO — R$ 27,90
         </Button>
 
