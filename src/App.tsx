@@ -15,6 +15,7 @@ const Diagnostico = lazy(() => import("./pages/Diagnostico"));
 const AcessoPremium = lazy(() => import("./pages/AcessoPremium"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Admin = lazy(() => import("./pages/Admin"));
 const EntregaPremium = lazy(() => import("./pages/EntregaPremium"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/obrigado" element={<AcessoPremium />} />
                 <Route path="/entrega-premium" element={<EntregaPremium />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

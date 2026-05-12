@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const DiagnosticoCTA = () => {
   const handlePayment = () => {
-    window.open("https://pay.kiwify.com.br/6n0HjlG", "_blank");
+    window.location.href = "https://pay.kiwify.com.br/6n0HjlG";
   };
 
   return (
