@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, CheckCircle2, Lightbulb, Target, TrendingUp, Download, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { downloadReport, copyToClipboard } from "@/lib/exportReport";
+import { downloadReport, downloadPdfReport, copyToClipboard } from "@/lib/exportReport";
 import type { FormData } from "@/pages/AcessoPremium";
 
 interface DiagnosticoResultProps {
@@ -231,7 +231,23 @@ const DiagnosticoResult = ({ isPremium = false, formData, diagnostico: propDiagn
         </div>
 
         {/* Export Actions */}
-        <div className="flex justify-center gap-3 mb-8">
+        <div className="flex justify-center gap-3 mb-8 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              downloadPdfReport({
+                diagnostico: diagnostico || "",
+                formData,
+                isPremium,
+              });
+              toast.success("PDF gerado com sucesso!");
+            }}
+            className="border-instagram-pink/30 text-instagram-pink hover:bg-instagram-pink/10"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Baixar PDF
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -243,10 +259,10 @@ const DiagnosticoResult = ({ isPremium = false, formData, diagnostico: propDiagn
               });
               toast.success("Relatório baixado com sucesso!");
             }}
-            className="border-instagram-pink/30 text-instagram-pink hover:bg-instagram-pink/10"
+            className="border-instagram-purple/30 text-instagram-purple hover:bg-instagram-purple/10"
           >
             <Download className="h-4 w-4 mr-2" />
-            Baixar Relatório
+            Baixar TXT
           </Button>
           <Button
             variant="outline"

@@ -52,7 +52,7 @@ const DiagnosticoFormPremium = ({ onSubmit }: DiagnosticoFormPremiumProps) => {
               type="text"
               placeholder="@seuusuario"
               value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
+              onChange={(e) => setInstagram(e.target.value.replace(/^@/, ''))}
               className="bg-background/50 border-border/50 focus:border-instagram-pink h-12"
               required
             />
