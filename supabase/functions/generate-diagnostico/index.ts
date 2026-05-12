@@ -132,6 +132,114 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Equilíbrio entre conteúdo educativo, cases e bastidores",
     },
   ],
+  "Música": [
+    {
+      problema: "Falta de identidade visual como artista",
+      implicacao: "O público não reconhece sua marca pessoal nas redes",
+      solucao: "Paleta de cores, fontes e estética que reflitam seu estilo musical",
+    },
+    {
+      problema: "Conteúdo sem mostrar o processo criativo",
+      implicacao: "Fãs querem bastidores, não só o produto final",
+      solucao: "Série de conteúdos mostrando making of, ensaios e bastidores",
+    },
+  ],
+  "Moda": [
+    {
+      problema: "Feed sem curadoria visual",
+      implicacao: "Parece amador e não atrai parcerias",
+      solucao: "Grid planejado com harmonia de cores e estilos",
+    },
+    {
+      problema: "Falta de conteúdo de look do dia / estilo",
+      implicacao: "Seguidores não se inspiram para comprar ou seguir",
+      solucao: "Série de looks organizados por ocasião e estação",
+    },
+  ],
+  "Viagem": [
+    {
+      problema: "Conteúdo só de destino, sem dicas úteis",
+      implicacao: "Seguidores curtem mas não salvam nem compartilham",
+      solucao: "Roteiros completos, dicas de hospedagem e orçamento",
+    },
+    {
+      problema: "Falta de engajamento com a audiência",
+      implicacao: "Baixo alcance orgânico e pouca interação",
+      solucao: "Enquetes e caixas de perguntas sobre próximos destinos",
+    },
+  ],
+  "Gastronomia": [
+    {
+      problema: "Fotos de comida sem qualidade profissional",
+      implicacao: "Não transmite o sabor e a experiência",
+      solucao: "Dicas de fotografia gastronômica com luz natural e composição",
+    },
+    {
+      problema: "Falta de receitas escritas nos posts",
+      implicacao: "Seguidores consomem mas não salvam o conteúdo",
+      solucao: "Carrosséis com passo a passo das receitas",
+    },
+  ],
+  "Saúde": [
+    {
+      problema: "Informação sem fonte ou embasamento",
+      implicacao: "Perde credibilidade profissional",
+      solucao: "Posts com referências científicas e dados confiáveis",
+    },
+    {
+      problema: "Linguagem muito técnica",
+      implicacao: "Público leigo não entende e não se engaja",
+      solucao: "Traduzir termos técnicos em benefícios práticos",
+    },
+  ],
+  "Educação": [
+    {
+      problema: "Conteúdo muito denso sem didática",
+      implicacao: "Alunos perdem interesse rápido",
+      solucao: "Micro-conteúdo com exemplos práticos e visuais",
+    },
+    {
+      problema: "Falta de autoridade no nicho",
+      implicacao: "Potenciais alunos não confiam no seu método",
+      solucao: "Cases de alunos, certificações e parcerias acadêmicas",
+    },
+  ],
+  "Tecnologia": [
+    {
+      problema: "Conteúdo genérico sobre tech",
+      implicacao: "Não se diferencia dos milhares de perfis de tecnologia",
+      solucao: "Tutoriais práticos, reviews honestos e cases reais",
+    },
+    {
+      problema: "Falta de demonstração prática",
+      implicacao: "Seguidores não veem a aplicação real do conhecimento",
+      solucao: "Screenshots, gravações de tela e projetos ao vivo",
+    },
+  ],
+  "Fotografia": [
+    {
+      problema: "Portfólio desorganizado no feed",
+      implicacao: "Clientes não conseguem avaliar seu estilo",
+      solucao: "Grid temático por tipo de ensaio ou paleta de cor",
+    },
+    {
+      problema: "Pouco conteúdo educativo sobre fotografia",
+      implicacao: "Não atrai seguidores qualificados",
+      solucao: "Dicas de composição, iluminação e edição nos posts",
+    },
+  ],
+  "Imobiliário": [
+    {
+      problema: "Fotos de imóveis sem qualidade",
+      implicacao: "Imóveis parecem menos valiosos do que são",
+      solucao: "Fotografia profissional e vídeos com tour guiado",
+    },
+    {
+      problema: "Falta de conteúdo sobre o mercado",
+      implicacao: "Não constrói autoridade como corretor",
+      solucao: "Análises de mercado, dicas para compradores e tendências",
+    },
+  ],
   "Política": [
     {
       problema: "Falta de propostas claras no perfil",
