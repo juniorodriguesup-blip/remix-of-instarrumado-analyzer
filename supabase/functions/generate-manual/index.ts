@@ -1,9 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
-// Allowed origins for CORS - restrict to known domains
 const allowedOrigins = [
-  "https://instarrumado.lovable.app",
+  "https://instarrumado.vercel.app",
   "https://instarrumado.com",
   "https://www.instarrumado.com.br",
   "https://instarrumado.com.br",
@@ -11,43 +10,20 @@ const allowedOrigins = [
   "http://localhost:8080",
 ];
 
-// Check if origin matches allowed patterns
 function isAllowedOrigin(origin: string): boolean {
-  // Check exact matches
   if (allowedOrigins.includes(origin)) return true;
-  
-  // Allow any *.lovable.app subdomain (for preview environments)
   if (origin.match(/^https:\/\/[a-z0-9-]+\.lovable\.app$/)) return true;
-  
   return false;
 }
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
   const allowedOrigin = isAllowedOrigin(origin) ? origin : allowedOrigins[0];
-  
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Credentials": "true",
   };
-}
-
-// Simple in-memory rate limiter
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_MAX = 10;
-const RATE_LIMIT_WINDOW = 60_000;
-
-function checkRateLimit(clientIp: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(clientIp);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(clientIp, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT_MAX) return false;
-  entry.count++;
-  return true;
 }
 
 const inputSchema = z.object({
@@ -57,38 +33,137 @@ const inputSchema = z.object({
   objetivo: z.string().min(5).max(200),
 });
 
-function sanitizeForPrompt(input: string): string {
-  return input
-    .replace(/[<>"`]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .substring(0, 200);
+const tipoLabels: Record<string, string> = {
+  criador: "Criador de Conteúdo",
+  empreendedor: "Empreendedor",
+  profissional: "Profissional Liberal",
+  politico: "Político",
+  outro: "Outro",
+};
+
+function gerarManual(instagram: string, tipo: string, nicho: string, objetivo: string): string {
+  const tipoLabel = tipoLabels[tipo] || tipo;
+  const capsNicho = nicho.charAt(0).toUpperCase() + nicho.slice(1);
+
+  const bioOptions = [
+    `Ajudo ${nicho === "fitness" ? "pessoas a transformarem o corpo" : nicho === "estética" ? "pessoas a realçarem a beleza" : nicho === "direito" ? "pessoas a resolverem problemas jurídicos" : `pessoas no ${nicho}`} com estratégia e resultado.`,
+    `${capsNicho} é o que importa. Transformo desafios em resultados para quem busca ${objetivo}.`,
+    `Especialista em ${nicho} • ${objetivo} • Transformando conhecimento em resultado.`,
+  ];
+
+  const randomBio = bioOptions[Math.floor(Math.random() * bioOptions.length)];
+
+  return `**1. Bio Estratégica Personalizada:**
+
+✨ ${capsNicho} | ${tipoLabel}
+🎯 ${randomBio}
+📲 Dica grátis toda semana nos Stories
+👇 Clique no link e transforme seu resultado
+
+**2. Estrutura de Destaques:**
+
+📌 **Quem Sou** — Sua história, formação e propósito (5-7 stories)
+🏆 **Resultados** — Cases e provas sociais organizadas (5-7 stories)
+🎯 **O que Faço** — Serviços e produtos explicados (5-7 stories)
+💡 **Dicas Grátis** — Conteúdo educativo de alto valor (5-7 stories)
+💬 **Depoimentos** — Provas sociais de clientes (5-7 stories)
+📞 **Contato** — Informações e link direto (5-7 stories)
+
+**3. Estratégia Visual do Feed:**
+
+🎨 **Paleta Recomendada:**
+- Cor principal: tons que remetem ao seu nicho (${nicho === "estética" || nicho === "beleza" ? "rosa suave, nude, dourado" : nicho === "direito" ? "azul marinho, cinza, branco" : nicho === "fitness" ? "preto, vermelho, cinza" : nicho === "marketing" ? "roxo, laranja, preto" : "azul, verde, branco"})
+- Cor de destaque: para CTAs e elementos importantes
+- Neutra: branco ou off-white para fundo
+
+📐 **Padrão Recomendado:** Grid em xadrez (alterna post informativo com post visual)
+
+📸 **Dicas:**
+- Use sempre o mesmo filtro/preset em todas as fotos
+- Fonte consistente em todos os cards
+- Planeje sempre 9 posts por vez para visualizar o grid completo
+
+**4. Calendário de Conteúdo (7 dias):**
+
+📅 **Semana 1 — Tema: ${capsNicho} que Transforma**
+
+**Segunda-feira** 📱 Formato: Reels
+Tema: Gancho poderoso sobre ${nicho}
+Objetivo: Entretenimento + Educação | Horário: 12h
+
+**Terça-feira** 📚 Formato: Carrossel
+Tema: 3 passos essenciais para ${objetivo}
+Objetivo: Autoridade | Horário: 18h
+
+**Quarta-feira** 🎬 Formato: Reels
+Tema: Bastidores do seu processo em ${nicho}
+Objetivo: Conexão | Horário: 12h
+
+**Quinta-feira** 📝 Formato: Post único
+Tema: Case/resultado real de cliente
+Objetivo: Prova social | Horário: 18h
+
+**Sexta-feira** 🎥 Formato: Reels
+Tema: Respondendo dúvidas comuns sobre ${nicho}
+Objetivo: Engajamento | Horário: 12h
+
+**Sábado** 💬 Formato: Stories
+Tema: Enquete/Caixa de perguntas sobre ${objetivo}
+Objetivo: Interação | Horário: 10h
+
+**Domingo** ✨ Formato: Post único
+Tema: Reflexão ou inspiração sobre ${nicho}
+Objetivo: Conexão pessoal | Horário: 19h
+
+**5. Roteiros de Reels Prontos:**
+
+🎬 **Reel 1 — Gancho Forte**
+Cena 1 (0-3s): "Pare de fazer isso no seu ${nicho} se você quer ${objetivo}"
+Cena 2 (3-15s): Mostre o erro comum e por que não funciona
+Cena 3 (15-25s): Apresente a alternativa correta
+Cena 4 (25-30s): CTA: "Salva esse Reels pra não esquecer"
+
+🎬 **Reel 2 — História/Bastidores**
+Cena 1 (0-3s): "Meu maior erro em ${nicho} foi..."
+Cena 2 (3-15s): Conte a história do erro e o aprendizado
+Cena 3 (15-25s): Mostre como você faz hoje
+Cena 4 (25-30s): CTA: "Comenta aqui se você já passou por isso"
+
+🎬 **Reel 3 — Lista Rápida**
+Cena 1 (0-3s): "3 coisas que ninguém te conta sobre ${nicho}"
+Cena 2 (3-20s): Liste e explique cada uma
+Cena 3 (20-28s): Resumo e conclusão
+Cena 4 (28-30s): CTA: "Qual delas você mais precisa?"
+
+**6. Scripts de Conversão no Direct:**
+
+💬 **Script 1 — Primeiro Contato:**
+"Oi [nome]! Vi seu perfil e notei que você é [característica do lead]. Sou [seu nome], ${tipoLabel} especialista em ${nicho}. Posso te ajudar com [problema específico]?"
+
+💬 **Script 2 — Qualificação:**
+"Que legal seu interesse! Me conta: qual é seu maior desafio com ${nicho} hoje? Assim posso te ajudar melhor."
+
+💬 **Script 3 — Apresentação:**
+"Entendi! Tenho um [serviço/produto] que ajuda exatamente com isso. Ele funciona assim: [explicação rápida]. Posso te explicar como funciona para o seu caso?"
+
+💬 **Script 4 — Fechamento:**
+"Perfeito! Para começar, o investimento é [valor]. Esse valor inclui [benefícios]. Te envio o link de pagamento?"
+
+💬 **Script 5 — Follow-up:**
+"Oi [nome]! Passando pra saber se conseguiu ver minha mensagem. Ainda estou por aqui se precisar de ajuda com ${nicho}."`;
 }
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || req.headers.get("x-real-ip")
-      || "unknown";
-
-    if (!checkRateLimit(clientIp)) {
-      return new Response(JSON.stringify({
-        error: "Muitas requisições. Tente novamente em 1 minuto.",
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const rawInput = await req.json();
     const validation = inputSchema.safeParse(rawInput);
-    
+
     if (!validation.success) {
       return new Response(JSON.stringify({ error: "Dados inválidos" }), {
         status: 400,
@@ -97,118 +172,13 @@ serve(async (req) => {
     }
 
     const { instagram, tipo, nicho, objetivo } = validation.data;
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    const tipoLabels: Record<string, string> = {
-      criador: "Criador de Conteúdo",
-      empreendedor: "Empreendedor",
-      profissional: "Profissional Liberal",
-      politico: "Político",
-      outro: "Outro",
-    };
-
-    const tipoLabel = tipoLabels[tipo] || tipo;
-    const safeInstagram = sanitizeForPrompt(instagram);
-    const safeNicho = sanitizeForPrompt(nicho);
-    const safeObjetivo = sanitizeForPrompt(objetivo);
-
-    const systemPrompt = `Você é um estrategista de Instagram especialista em arrumação de perfis e posicionamento digital.
-Sua tarefa é criar um MANUAL DE ARRUMAÇÃO 100% PERSONALIZADO para o perfil do cliente.
-
-FORMATO OBRIGATÓRIO - Use EXATAMENTE estas seções com os marcadores:
-
-**1. Bio Estratégica Personalizada:**
-Crie uma bio PRONTA para o cliente copiar e colar, específica para o nicho e objetivo dele.
-Inclua emojis estratégicos, linha de autoridade, transformação que oferece, e CTA.
-
-**2. Estrutura de Destaques:**
-Liste 5-6 destaques estratégicos com nomes criativos e específicos para o nicho.
-Para cada destaque, explique o que colocar dentro (5-7 stories por destaque).
-
-**3. Estratégia Visual do Feed:**
-Defina paleta de cores específica para o nicho (cite cores em português).
-Sugira padrão de organização (xadrez, linhas, colunas) e explique como aplicar.
-Dê exemplos de tipos de post para cada posição.
-
-**4. Calendário de Conteúdo (7 dias):**
-Crie um calendário ESPECÍFICO para a semana com:
-- Dia da semana
-- Formato (Reels, Carrossel, Stories, Post único)
-- Tema/título do conteúdo específico para o nicho
-- Objetivo do post (engajamento, autoridade, venda, conexão)
-- Horário sugerido
-
-**5. Roteiros de Reels Prontos:**
-Crie 3 roteiros COMPLETOS de Reels específicos para o nicho:
-- Gancho (primeiros 3 segundos)
-- Desenvolvimento
-- CTA final
-Cada roteiro deve ser sobre um tema relevante para o objetivo do cliente.
-
-**6. Scripts de Conversão no Direct:**
-Crie 4 scripts prontos para usar no Direct:
-- Primeiro contato
-- Qualificação
-- Apresentação do serviço/produto
-- Fechamento
-Personalize para o tipo de oferta que o cliente provavelmente tem.
-
-REGRAS:
-- Seja ULTRA ESPECÍFICO para o nicho e objetivo informados
-- Use exemplos reais e práticos que o cliente possa aplicar HOJE
-- Não use conteúdo genérico - cada seção deve refletir o perfil do cliente
-- Use linguagem direta e profissional
-- Formate cada seção claramente para fácil leitura`;
-
-    const userPrompt = `Crie um Manual de Arrumação COMPLETO e PERSONALIZADO para este perfil:
-
-PERFIL DO CLIENTE:
-- Instagram: ${safeInstagram}
-- Tipo: ${tipoLabel}
-- Nicho: ${safeNicho}
-- Objetivo: ${safeObjetivo}
-
-Lembre-se: Este cliente é ${tipoLabel} que atua no nicho de "${safeNicho}" e quer "${safeObjetivo}".
-Todo o conteúdo do manual deve ser específico para esta combinação única.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "Erro ao gerar manual" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-    const manual = data.choices?.[0]?.message?.content || "Não foi possível gerar o manual.";
-
-    console.log(`Manual generated successfully`);
+    const manual = gerarManual(instagram, tipo, nicho, objetivo);
 
     return new Response(JSON.stringify({ manual }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in generate-manual:", error);
+    console.error("Error:", error);
     return new Response(JSON.stringify({ error: "Erro ao processar solicitação" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
