@@ -34,9 +34,9 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <Tracking />
-          <SocialProofNotifications />
           <BrowserRouter>
+            <Tracking />
+            <SocialProofNotifications />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 <Route path="/" element={<Index />} />
