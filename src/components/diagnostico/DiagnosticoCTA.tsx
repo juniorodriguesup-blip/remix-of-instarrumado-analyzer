@@ -1,4 +1,4 @@
-import { Unlock, CheckCircle } from "lucide-react";
+import { Sparkles, Shield, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DiagnosticoCTA = () => {
@@ -8,49 +8,53 @@ const DiagnosticoCTA = () => {
 
   return (
     <section className="py-16 md:py-24 relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-t from-instagram-purple/20 via-background to-background" />
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-instagram-pink/30 rounded-full blur-3xl animate-pulse-glow" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-instagram-purple/[0.04] to-instagram-pink/[0.04]" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-r from-instagram-purple/20 via-instagram-pink/20 to-instagram-orange/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-4 max-w-2xl text-center">
-        {/* Text */}
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-          Sua cura estratégica está pronta.
+        <span className="inline-flex items-center gap-2 bg-gradient-to-r from-instagram-purple/20 to-instagram-pink/20 border border-instagram-pink/20 rounded-full px-4 py-1.5 mb-6">
+          <Sparkles className="h-4 w-4 text-instagram-pink" />
+          <span className="text-sm font-medium gradient-text">Transforme seu Instagram agora</span>
+        </span>
+
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          Seu diagnóstico completo está pronto
         </h2>
-        <p className="text-lg text-muted-foreground mb-4 max-w-xl mx-auto">
-          As seções acima contêm o plano prático para arrumar seu perfil HOJE.
-        </p>
-        <p className="text-foreground font-medium mb-10">
-          Sem teoria. Sem motivação vazia. Sem achismo.
+        <p className="text-lg text-muted-foreground mb-6 max-w-lg mx-auto">
+          Você viu apenas uma prévia. O relatório completo com bio pronta, calendário, roteiros e scripts está esperando por você.
         </p>
 
-        {/* CTA Button */}
-        <Button
-          onClick={handlePayment}
-          className="h-12 px-6 text-base md:h-16 md:px-12 md:text-xl font-bold btn-gradient animate-pulse-glow w-full max-w-xs md:max-w-none md:w-auto"
-        >
-          <Unlock className="mr-2 h-5 w-5 md:mr-3 md:h-6 md:w-6" />
-          DESBLOQUEAR TUDO — R$ 27,90
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <Button
+            onClick={handlePayment}
+            className="btn-gradient text-base px-8 py-6 h-auto shadow-lg shadow-instagram-pink/25 hover:shadow-instagram-pink/40 transition-all group"
+          >
+            <Zap className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+            Desbloquear tudo — R$ 27,90
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
 
-        {/* Microcopy */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>Pagamento Seguro</span>
+            <Shield className="h-4 w-4 text-green-500" />
+            <span>Pagamento 100% seguro</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>Liberação imediata</span>
+            <Zap className="h-4 w-4 text-instagram-pink" />
+            <span>Acesso imediato</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>Acesso completo ao diagnóstico real</span>
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>Cancele quando quiser</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-border/30">
+        <p className="text-xs text-muted-foreground mt-8 max-w-md mx-auto">
+          ⚠️ Após a confirmação do pagamento, você será redirecionado automaticamente para a área VIP com todo o conteúdo personalizado.
+        </p>
+
+        <div className="mt-12 pt-8 border-t border-border/30">
           <p className="text-sm text-muted-foreground">
             © 2026 Instarrumado. Todos os direitos reservados.
           </p>

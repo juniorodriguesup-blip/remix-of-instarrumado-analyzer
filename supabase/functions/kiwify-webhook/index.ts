@@ -142,6 +142,32 @@ serve(async (req) => {
 
     console.log(`Successfully upgraded subscription for order ${orderId}`);
 
+    // Send premium email notification
+    try {
+      const emailResponse = await fetch(
+        `${supabaseUrl}/functions/v1/send-premium-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            email: customerEmail,
+            order_id: orderId,
+          }),
+        }
+      );
+
+      if (emailResponse.ok) {
+        console.log(`Premium email sent to ${customerEmail} for order ${orderId}`);
+      } else {
+        console.warn(`Failed to send premium email for order ${orderId}`);
+      }
+    } catch (emailError) {
+      console.warn(`Email notification error for order ${orderId}:`, emailError);
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: "Subscription upgraded to premium"

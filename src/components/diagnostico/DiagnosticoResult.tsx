@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, CheckCircle2, Lightbulb, Target, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Lightbulb, Target, TrendingUp, Download, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { downloadReport, copyToClipboard } from "@/lib/exportReport";
 import type { FormData } from "@/pages/AcessoPremium";
 
 interface DiagnosticoResultProps {
   isPremium?: boolean;
   formData: FormData;
+  diagnostico?: string | null;
 }
 
 interface ParsedSection {
@@ -100,12 +104,18 @@ const parseMarkdown = (text: string): ParsedSection[] => {
   return sections;
 };
 
-const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultProps) => {
-  const [diagnostico, setDiagnostico] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+const DiagnosticoResult = ({ isPremium = false, formData, diagnostico: propDiagnostico }: DiagnosticoResultProps) => {
+  const [diagnostico, setDiagnostico] = useState<string | null>(propDiagnostico || null);
+  const [loading, setLoading] = useState(!propDiagnostico);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (propDiagnostico) {
+      setDiagnostico(propDiagnostico);
+      setLoading(false);
+      return;
+    }
+
     const generateDiagnostico = async () => {
       setLoading(true);
       setError(null);
@@ -117,7 +127,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
             tipo: formData.tipo,
             nicho: formData.nicho,
             objetivo: formData.objetivo,
-            isPremium: true, // Always premium in this context
+            isPremium: true,
           },
         });
 
@@ -139,7 +149,7 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
     };
 
     generateDiagnostico();
-  }, [formData]);
+  }, [formData, propDiagnostico]);
 
   if (loading) {
     return (
@@ -218,6 +228,42 @@ const DiagnosticoResult = ({ isPremium = false, formData }: DiagnosticoResultPro
           <span className="bg-instagram-orange/20 text-instagram-orange px-4 py-2 rounded-full font-medium">
             {formData.objetivo}
           </span>
+        </div>
+
+        {/* Export Actions */}
+        <div className="flex justify-center gap-3 mb-8">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              downloadReport({
+                diagnostico: diagnostico || "",
+                formData,
+                isPremium,
+              });
+              toast.success("Relatório baixado com sucesso!");
+            }}
+            className="border-instagram-pink/30 text-instagram-pink hover:bg-instagram-pink/10"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Baixar Relatório
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const success = await copyToClipboard(diagnostico || "");
+              if (success) {
+                toast.success("Diagnóstico copiado!");
+              } else {
+                toast.error("Erro ao copiar");
+              }
+            }}
+            className="border-instagram-purple/30 text-instagram-purple hover:bg-instagram-purple/10"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copiar Diagnóstico
+          </Button>
         </div>
 
         {/* Diagnosis content - Sections */}

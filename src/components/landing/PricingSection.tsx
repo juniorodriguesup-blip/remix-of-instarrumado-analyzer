@@ -1,129 +1,179 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, ArrowRight, X, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const PricingSection = () => {
-  const navigate = useNavigate();
   const freePlan = {
-    name: "FREE",
-    subtitle: "Diagnóstico Essencial",
-    price: "Grátis",
+    name: "Diagnóstico Gratuito",
+    price: "R$ 0",
+    period: "",
+    cta: "Começar grátis",
+    ctaLink: "/diagnostico",
     features: [
-      "Visão geral do seu perfil",
-      "Pontos de melhoria visíveis",
-      "Clareza do que está te travando",
+      { text: "Análise básica do perfil", included: true },
+      { text: "3 problemas principais identificados", included: true },
+      { text: "Prévia do diagnóstico estratégico", included: true },
+      { text: "Bio otimizada pronta", included: false },
+      { text: "Estrutura de destaques", included: false },
+      { text: "Calendário de conteúdo 7 dias", included: false },
+      { text: "Roteiros de Reels prontos", included: false },
+      { text: "Scripts de conversão para Direct", included: false },
+      { text: "Manual de Arrumação completo", included: false },
+      { text: "Suporte prioritário", included: false },
     ],
   };
 
   const premiumPlan = {
-    name: "PREMIUM",
-    subtitle: "Instagram Profissional & Magnético",
-    price: "R$27,90",
+    name: "Plano Premium",
+    price: "R$ 27,90",
     period: "/mês",
+    cta: "Quero desbloquear tudo",
+    ctaLink: "/auth",
+    popular: true,
     features: [
-      "Bio otimizada pronta",
-      "Estrutura de destaques",
-      "Calendário de conteúdo",
-      "Roteiros de Reels",
-      "Scripts para Direct",
-      "Organização visual do feed",
+      { text: "Diagnóstico completo com IA", included: true },
+      { text: "Todos os problemas identificados", included: true },
+      { text: "Relatório estratégico completo", included: true },
+      { text: "Bio otimizada pronta para copiar", included: true },
+      { text: "Estrutura de destaques personalizada", included: true },
+      { text: "Calendário de conteúdo 7 dias", included: true },
+      { text: "Roteiros de Reels prontos", included: true },
+      { text: "Scripts de conversão para Direct", included: true },
+      { text: "Manual de Arrumação completo", included: true },
+      { text: "Suporte prioritário", included: true },
     ],
   };
 
   return (
-    <section className="py-20 md:py-32 relative">
-      <div className="container mx-auto px-4">
+    <section className="py-24 md:py-32 relative overflow-hidden" id="precos">
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-instagram-pink/[0.02] to-background" />
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 bg-gradient-to-r from-instagram-purple/20 to-instagram-pink/20 border border-instagram-pink/20 rounded-full px-4 py-1.5 mb-6">
+              <Sparkles className="h-4 w-4 text-instagram-pink" />
+              <span className="text-sm font-medium gradient-text">Invista no seu posicionamento</span>
+            </span>
+
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
               Comece <span className="gradient-text">grátis</span>.
             </h2>
-            <p className="text-xl text-muted-foreground">
-              E só continue se fizer sentido.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Veja o diagnóstico básico sem custo. Se fizer sentido, desbloqueie o completo.
             </p>
           </div>
-          
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
-            <div className="glass-card p-8 relative">
+            <div className="glass-card rounded-2xl p-8 relative hover:border-instagram-pink/20 transition-all duration-300">
               <div className="mb-6">
-                <span className="text-sm font-bold text-muted-foreground tracking-wider">{freePlan.name}</span>
-                <h3 className="text-2xl font-bold mt-1">{freePlan.subtitle}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-1">{freePlan.name}</h3>
+                <p className="text-sm text-muted-foreground">Para quem quer começar</p>
               </div>
-              
+
               <div className="mb-8">
-                <span className="text-4xl font-bold">{freePlan.price}</span>
+                <span className="text-4xl font-bold text-foreground">{freePlan.price}</span>
               </div>
-              
-              <ul className="space-y-4 mb-8">
+
+              <ul className="space-y-3 mb-8">
                 {freePlan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-foreground" />
-                    </div>
-                    <span className="text-muted-foreground">{feature}</span>
+                  <li key={index} className="flex items-center gap-3 text-sm">
+                    {feature.included ? (
+                      <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-green-500" />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <X className="w-3 h-3 text-muted-foreground/50" />
+                      </div>
+                    )}
+                    <span className={feature.included ? "text-foreground" : "text-muted-foreground/50"}>
+                      {feature.text}
+                    </span>
                   </li>
                 ))}
               </ul>
-              
-              <Button 
-                variant="outline" 
-                className="w-full py-6 text-lg"
-                onClick={() => navigate("/auth")}
+
+              <Button
+                asChild
+                variant="outline"
+                className="w-full py-6 text-base border-muted-foreground/30 hover:border-instagram-pink/50 hover:text-instagram-pink"
               >
-                Começar grátis
+                <Link to={freePlan.ctaLink}>
+                  {freePlan.cta}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
-            
+
             {/* Premium Plan */}
-            <div className="glass-card p-8 relative gradient-border overflow-hidden">
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-instagram-purple/10 via-instagram-pink/10 to-instagram-orange/10" />
+            <div className="relative rounded-2xl">
+              <div className="absolute -inset-1 bg-gradient-to-br from-instagram-purple via-instagram-pink to-instagram-orange rounded-2xl blur-sm opacity-75" />
               
-              <div className="relative z-10">
-                {/* Popular Badge */}
-                <div className="absolute -top-0 -right-0">
-                  <span className="gradient-bg text-primary-foreground font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
+              <div className="relative glass-card rounded-2xl p-8 bg-background/95 backdrop-blur-xl h-full flex flex-col">
+                <div className="absolute -top-3 right-6">
+                  <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-instagram-purple to-instagram-pink text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-lg shadow-instagram-pink/30">
                     <Sparkles className="w-3 h-3" />
-                    RECOMENDADO
+                    MAIS POPULAR
                   </span>
                 </div>
-                
+
                 <div className="mb-6">
-                  <span className="text-sm font-bold gradient-text tracking-wider">{premiumPlan.name}</span>
-                  <h3 className="text-2xl font-bold mt-1">{premiumPlan.subtitle}</h3>
+                  <h3 className="text-xl font-bold gradient-text mb-1">{premiumPlan.name}</h3>
+                  <p className="text-sm text-muted-foreground">Para quem leva a sério</p>
                 </div>
-                
+
                 <div className="mb-8">
                   <span className="text-4xl font-bold gradient-text">{premiumPlan.price}</span>
-                  <span className="text-muted-foreground">{premiumPlan.period}</span>
+                  <span className="text-muted-foreground ml-1">{premiumPlan.period}</span>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Menos que R$ 1/dia — o café mais barato que vai transformar seu Instagram
+                  </p>
                 </div>
-                
-                <ul className="space-y-4 mb-8">
+
+                <ul className="space-y-3 mb-8 flex-1">
                   {premiumPlan.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
-                        <Check className="w-3 h-3 text-primary-foreground" />
-                      </div>
-                      <span className="text-foreground">{feature}</span>
+                    <li key={index} className="flex items-center gap-3 text-sm">
+                      {feature.included ? (
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-instagram-pink to-instagram-purple flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <X className="w-3 h-3 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      <span className={feature.included ? "text-foreground font-medium" : "text-muted-foreground/50"}>
+                        {feature.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
-                
-                <Button 
-                  className="btn-gradient w-full py-6 text-lg animate-pulse-glow"
-                  onClick={() => navigate("/auth")}
+
+                <Button
+                  asChild
+                  className="btn-gradient w-full py-6 text-base shadow-lg shadow-instagram-pink/25 hover:shadow-instagram-pink/40 transition-all"
                 >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Desbloquear versão Premium
+                  <Link to={premiumPlan.ctaLink}>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    {premiumPlan.cta}
+                  </Link>
                 </Button>
-                
-                <p className="text-center text-sm text-muted-foreground mt-4">
-                  💎 Menos que um café por semana para não parecer amador online.
-                </p>
+
+                <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
+                  <span>🔒 Pagamento 100% seguro</span>
+                  <span>⚡ Acesso imediato</span>
+                  <span>↩️ Cancele quando quiser</span>
+                </div>
               </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-background/50 border border-border/50 rounded-full px-5 py-2.5">
+              <HelpCircle className="h-4 w-4" />
+              <span>Tem dúvidas? Fale conosco no WhatsApp: +55 11 99948-4196</span>
             </div>
           </div>
         </div>

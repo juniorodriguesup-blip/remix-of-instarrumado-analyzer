@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/ui/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,6 +81,10 @@ const Auth = () => {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
+      <SEO
+        title={isLogin ? "Entrar" : "Criar Conta"}
+        description="Acesse sua conta Instarrumado para ver seus diagnósticos e continuar de onde parou."
+      />
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8 flex items-center justify-center gap-3">
