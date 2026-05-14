@@ -8,7 +8,7 @@ interface SEOProps {
   type?: "website" | "article";
 }
 
-const defaultImage = "https://instarrumado.com.br/logo-instarrumado.svg";
+const defaultImage = "https://instarrumado.com.br/og-image.jpg";
 
 const SEO = ({ title, description, image = defaultImage, type = "website" }: SEOProps) => {
   const location = useLocation();
