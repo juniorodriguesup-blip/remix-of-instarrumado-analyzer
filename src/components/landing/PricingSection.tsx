@@ -1,4 +1,4 @@
-import { Check, Sparkles, ArrowRight, X, HelpCircle } from "lucide-react";
+import { Check, Sparkles, ArrowRight, X, HelpCircle, Clock, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -27,7 +27,8 @@ const PricingSection = () => {
     name: "Plano Premium",
     price: "R$ 57,90",
     period: "/mês",
-    cta: "Quero desbloquear tudo",
+    originalPrice: "R$ 197",
+    cta: "Quero meu diagnóstico completo agora",
     ctaLink: "/auth",
     popular: true,
     features: [
@@ -50,14 +51,24 @@ const PricingSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto">
+          {/* Scarcity banner */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-red-500/15 border border-red-500/40 rounded-full px-5 py-2.5 animate-pulse">
+              <Clock className="h-4 w-4 text-red-400" />
+              <span className="text-sm font-semibold text-red-400">
+                Oferta por tempo limitado! Pode encerrar a qualquer momento!
+              </span>
+            </div>
+          </div>
+
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 bg-gradient-to-r from-instagram-purple/20 to-instagram-pink/20 border border-instagram-pink/20 rounded-full px-4 py-1.5 mb-6">
               <Sparkles className="h-4 w-4 text-instagram-pink" />
-              <span className="text-sm font-medium gradient-text">Invista no seu posicionamento</span>
+              <span className="text-sm font-medium gradient-text">Edição inaugural</span>
             </span>
 
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Comece <span className="gradient-text">grátis</span>.
+              Comece <span className="gradient-text">grátis</span>. Depois decida.
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Veja o diagnóstico básico sem custo. Se fizer sentido, desbloqueie o completo.
@@ -115,20 +126,29 @@ const PricingSection = () => {
                 <div className="absolute -top-3 right-6">
                   <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-instagram-purple to-instagram-pink text-white font-bold px-4 py-1.5 rounded-full text-xs shadow-lg shadow-instagram-pink/30">
                     <Sparkles className="w-3 h-3" />
-                    MAIS POPULAR
+                    EDICAO INAUGURAL
                   </span>
                 </div>
 
                 <div className="mb-6">
                   <h3 className="text-xl font-bold gradient-text mb-1">{premiumPlan.name}</h3>
-                  <p className="text-sm text-muted-foreground">Para quem leva a sério</p>
+                  <p className="text-sm text-muted-foreground">Acesso completo — liberação imediata</p>
                 </div>
 
-                <div className="mb-8">
+                {/* Value anchoring - original price struck through */}
+                <div className="mb-2">
+                  <span className="text-lg text-muted-foreground line-through">{premiumPlan.originalPrice}</span>
+                  <span className="text-xs text-muted-foreground ml-2">Valor real do diagnóstico</span>
+                </div>
+
+                <div className="mb-6">
                   <span className="text-4xl font-bold gradient-text">{premiumPlan.price}</span>
                   <span className="text-muted-foreground ml-1">{premiumPlan.period}</span>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Menos de R$ 2/dia — o preço de um cafezinho premium que vai transformar seu Instagram
+                    Menos de R$ 2/dia — mais barato que um cafezinho premium
+                  </p>
+                  <p className="text-xs text-green-500 font-medium mt-1">
+                    ⚡ Uma consultoria de Instagram custa de R$ 200 a R$ 500 por hora.
                   </p>
                 </div>
 
@@ -156,7 +176,7 @@ const PricingSection = () => {
                   className="btn-gradient w-full py-6 text-base shadow-lg shadow-instagram-pink/25 hover:shadow-instagram-pink/40 transition-all"
                 >
                   <Link to={premiumPlan.ctaLink}>
-                    <Sparkles className="mr-2 h-5 w-5" />
+                    <Zap className="mr-2 h-5 w-5" />
                     {premiumPlan.cta}
                   </Link>
                 </Button>
@@ -164,16 +184,21 @@ const PricingSection = () => {
                 <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
                   <span>🔒 Pagamento 100% seguro</span>
                   <span>⚡ Acesso imediato</span>
-                  <span>↩️ Cancele quando quiser</span>
+                  <span>↩️ Garantia 7 dias</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          {/* Trust + urgency footer */}
+          <div className="text-center mt-12 space-y-4">
+            <div className="inline-flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-5 py-2.5">
+              <Clock className="h-4 w-4" />
+              <span className="font-semibold">Essa oferta pode expirar a qualquer momento!</span>
+            </div>
             <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-background/50 border border-border/50 rounded-full px-5 py-2.5">
-              <HelpCircle className="h-4 w-4" />
-              <span>Tem dúvidas? Fale conosco no WhatsApp: +55 11 99948-4196</span>
+              <Shield className="h-4 w-4" />
+              <span>7 dias de garantia. Se não fizer sentido, devolvemos 100%.</span>
             </div>
           </div>
         </div>

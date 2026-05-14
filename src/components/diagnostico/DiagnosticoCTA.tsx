@@ -1,4 +1,4 @@
-import { Sparkles, Shield, Zap, ArrowRight } from "lucide-react";
+import { Sparkles, Shield, Zap, ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DiagnosticoCTA = () => {
@@ -12,10 +12,13 @@ const DiagnosticoCTA = () => {
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-r from-instagram-purple/20 via-instagram-pink/20 to-instagram-orange/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-4 max-w-2xl text-center">
-        <span className="inline-flex items-center gap-2 bg-gradient-to-r from-instagram-purple/20 to-instagram-pink/20 border border-instagram-pink/20 rounded-full px-4 py-1.5 mb-6">
-          <Sparkles className="h-4 w-4 text-instagram-pink" />
-          <span className="text-sm font-medium gradient-text">Transforme seu Instagram agora</span>
-        </span>
+        {/* Scarcity banner */}
+        <div className="inline-flex items-center gap-2 bg-red-500/15 border border-red-500/40 rounded-full px-5 py-2.5 mb-6">
+          <Clock className="h-4 w-4 text-red-400" />
+          <span className="text-sm font-semibold text-red-400">
+            Oferta por tempo limitado! Pode encerrar a qualquer momento!
+          </span>
+        </div>
 
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
           Seu diagnóstico completo está pronto
@@ -23,6 +26,12 @@ const DiagnosticoCTA = () => {
         <p className="text-lg text-muted-foreground mb-6 max-w-lg mx-auto">
           Você viu apenas uma prévia. O relatório completo com bio pronta, calendário, roteiros e scripts está esperando por você.
         </p>
+
+        {/* Value anchoring */}
+        <div className="mb-6">
+          <span className="text-lg text-muted-foreground line-through">De: R$ 197</span>
+          <span className="text-sm text-muted-foreground ml-2">Valor real do diagnóstico</span>
+        </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <Button
@@ -35,6 +44,10 @@ const DiagnosticoCTA = () => {
           </Button>
         </div>
 
+        <p className="text-sm text-muted-foreground mb-4">
+          Agência cobra de R$ 3 mil a R$ 8 mil por mês. Você paga menos de R$ 2/dia.
+        </p>
+
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-green-500" />
@@ -46,7 +59,7 @@ const DiagnosticoCTA = () => {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span>Cancele quando quiser</span>
+            <span>Garantia 7 dias</span>
           </div>
         </div>
 
