@@ -13,6 +13,21 @@ interface PixelEvent {
   data?: Record<string, any>;
 }
 
+function loadFbPixelScript(pixelId: string) {
+  window.fbq = function () {
+    window._fbq = window._fbq || [];
+    window._fbq.push(arguments);
+  };
+  window.fbq("init", pixelId);
+  window.fbq("track", "PageView");
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.defer = true;
+  script.src = "https://connect.facebook.net/en_US/fbevents.js";
+  document.head.appendChild(script);
+}
+
 const Tracking = () => {
   const location = useLocation();
 
@@ -21,15 +36,11 @@ const Tracking = () => {
 
     if (!pixelId) return;
 
-    if (!window.fbq) {
-      window.fbq = function () {
-        window._fbq = window._fbq || [];
-        window._fbq.push(arguments);
-      };
-      window.fbq("init", pixelId);
+    if (!window._fbq) {
+      loadFbPixelScript(pixelId);
+    } else {
+      window.fbq("track", "PageView");
     }
-
-    window.fbq("track", "PageView");
   }, [location.pathname]);
 
   return null;
