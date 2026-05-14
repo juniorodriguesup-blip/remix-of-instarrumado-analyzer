@@ -25,7 +25,7 @@ const PricingSection = () => {
 
   const premiumPlan = {
     name: "Plano Premium",
-    price: "R$ 27,90",
+    price: "R$ 57,90",
     period: "/mês",
     cta: "Quero desbloquear tudo",
     ctaLink: "/auth",
@@ -128,7 +128,7 @@ const PricingSection = () => {
                   <span className="text-4xl font-bold gradient-text">{premiumPlan.price}</span>
                   <span className="text-muted-foreground ml-1">{premiumPlan.period}</span>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Menos que R$ 1/dia — o café mais barato que vai transformar seu Instagram
+                    Menos de R$ 2/dia — o preço de um cafezinho premium que vai transformar seu Instagram
                   </p>
                 </div>
 

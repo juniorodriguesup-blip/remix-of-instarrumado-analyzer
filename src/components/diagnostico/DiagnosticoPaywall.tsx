@@ -98,7 +98,7 @@ const DiagnosticoPaywall = () => {
         <div className="text-center mt-10">
           <div className="inline-block glass-card rounded-2xl p-6 max-w-md">
             <p className="text-lg font-bold text-foreground mb-2">
-              Tudo isso por menos de R$ 1/dia
+              Tudo isso por menos de R$ 2/dia
             </p>
             <p className="text-sm text-muted-foreground mb-4">
               Diagnóstico completo, bio pronta, calendário, roteiros e scripts — tudo personalizado para você.

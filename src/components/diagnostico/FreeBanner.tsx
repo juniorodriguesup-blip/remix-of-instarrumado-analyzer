@@ -16,7 +16,7 @@ const FreeBanner = () => {
           </p>
           <p className="text-xs text-instagram-pink font-medium mt-1">
             <Sparkles className="h-3 w-3 inline mr-0.5" />
-            Desbloqueie tudo por menos de R$ 1/dia
+            Desbloqueie tudo por menos de R$ 2/dia
           </p>
         </div>
       </div>

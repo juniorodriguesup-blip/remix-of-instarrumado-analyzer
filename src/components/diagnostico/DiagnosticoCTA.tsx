@@ -30,7 +30,7 @@ const DiagnosticoCTA = () => {
             className="btn-gradient text-base px-8 py-6 h-auto shadow-lg shadow-instagram-pink/25 hover:shadow-instagram-pink/40 transition-all group"
           >
             <Zap className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-            Desbloquear tudo — R$ 27,90
+            Desbloquear tudo — R$ 57,90
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
