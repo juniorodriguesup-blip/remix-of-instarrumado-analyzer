@@ -1,29 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" fill="none" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#833AB4"/>
       <stop offset="45%" stop-color="#E1306C"/>
       <stop offset="100%" stop-color="#FCAF45"/>
     </linearGradient>
+    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#833AB4"/>
+      <stop offset="50%" stop-color="#E1306C"/>
+      <stop offset="100%" stop-color="#FCAF45"/>
+    </linearGradient>
   </defs>
 
-  <!-- Main "I" monogram shape -->
-  <path fill="url(#grad)" d="M256 460c-8 0-15-4-19-10l-60-90c-3-5-1-12 4-15l90-60c6-4 14-4 20 0l90 60c5 4 7 10 4 15l-60 90c-4 6-11 10-19 10h-50z"/>
+  <!-- Main geometric shape - inspired by the original style -->
+  <path fill="url(#g)" d="M296 440c-11 0-20-9-20-20V320c0-11-9-20-20-20H160c-11 0-20-9-20-20s9-20 20-20h96c33 0 60 27 60 60v60h36c11 0 20 9 20 20s-9 20-20 20h-56z"/>
 
-  <!-- Vertical stroke of the "I" -->
-  <rect x="236" y="60" width="40" height="250" rx="20" ry="20" fill="url(#grad)"/>
+  <!-- Vertical stroke -->
+  <rect x="236" y="80" width="40" height="240" rx="20" ry="20" fill="url(#g)"/>
 
-  <!-- Curved swoosh at the bottom -->
-  <path fill="url(#grad)" d="M276 310c0 40-20 75-50 95l-15 10c-8 5-16 2-19-6l-35-80c-3-8 2-16 10-16h90c11 0 19 9 19 20z"/>
+  <!-- Swoosh bottom -->
+  <path fill="url(#g)" d="M256 320v60c0 11-9 20-20 20h-56c-11 0-20-9-20-20s9-20 20-20h36v-40c0-11 9-20 20-20s20 9 20 20z"/>
 
-  <!-- Ambient glows -->
-  <ellipse cx="200" cy="200" rx="140" ry="140" fill="#E1306C" opacity="0.12" filter="url(#g1)"/>
-  <ellipse cx="330" cy="330" rx="120" ry="120" fill="#833AB4" opacity="0.1" filter="url(#g2)"/>
-  <ellipse cx="260" cy="150" rx="100" ry="100" fill="#FCAF45" opacity="0.08" filter="url(#g3)"/>
+  <!-- Glow effects with brand colors -->
+  <ellipse cx="220" cy="180" rx="160" ry="160" fill="#E1306C" opacity="0.1" filter="url(#b)"/>
+  <ellipse cx="320" cy="350" rx="130" ry="130" fill="#833AB4" opacity="0.08" filter="url(#c)"/>
+  <ellipse cx="280" cy="130" rx="100" ry="100" fill="#FCAF45" opacity="0.07" filter="url(#d)"/>
 
   <defs>
-    <filter id="g1"><feGaussianBlur stdDeviation="50"/></filter>
-    <filter id="g2"><feGaussianBlur stdDeviation="45"/></filter>
-    <filter id="g3"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="b"><feGaussianBlur stdDeviation="50"/></filter>
+    <filter id="c"><feGaussianBlur stdDeviation="45"/></filter>
+    <filter id="d"><feGaussianBlur stdDeviation="40"/></filter>
   </defs>
 </svg>
