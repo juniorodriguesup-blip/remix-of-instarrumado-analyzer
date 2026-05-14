@@ -5,30 +5,8 @@
       <stop offset="45%" stop-color="#E1306C"/>
       <stop offset="100%" stop-color="#FCAF45"/>
     </linearGradient>
-    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#833AB4"/>
-      <stop offset="50%" stop-color="#E1306C"/>
-      <stop offset="100%" stop-color="#FCAF45"/>
-    </linearGradient>
   </defs>
-
-  <!-- Main geometric shape - inspired by the original style -->
-  <path fill="url(#g)" d="M296 440c-11 0-20-9-20-20V320c0-11-9-20-20-20H160c-11 0-20-9-20-20s9-20 20-20h96c33 0 60 27 60 60v60h36c11 0 20 9 20 20s-9 20-20 20h-56z"/>
-
-  <!-- Vertical stroke -->
-  <rect x="236" y="80" width="40" height="240" rx="20" ry="20" fill="url(#g)"/>
-
-  <!-- Swoosh bottom -->
-  <path fill="url(#g)" d="M256 320v60c0 11-9 20-20 20h-56c-11 0-20-9-20-20s9-20 20-20h36v-40c0-11 9-20 20-20s20 9 20 20z"/>
-
-  <!-- Glow effects with brand colors -->
-  <ellipse cx="220" cy="180" rx="160" ry="160" fill="#E1306C" opacity="0.1" filter="url(#b)"/>
-  <ellipse cx="320" cy="350" rx="130" ry="130" fill="#833AB4" opacity="0.08" filter="url(#c)"/>
-  <ellipse cx="280" cy="130" rx="100" ry="100" fill="#FCAF45" opacity="0.07" filter="url(#d)"/>
-
-  <defs>
-    <filter id="b"><feGaussianBlur stdDeviation="50"/></filter>
-    <filter id="c"><feGaussianBlur stdDeviation="45"/></filter>
-    <filter id="d"><feGaussianBlur stdDeviation="40"/></filter>
-  </defs>
+  <g transform="scale(10.667, 11.13) translate(0, 0)">
+    <path fill="url(#g)" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" />
+  </g>
 </svg>
