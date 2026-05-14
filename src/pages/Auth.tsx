@@ -13,12 +13,11 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
 
-  // Get the redirect URL from query params (used after login)
   const redirectTo = searchParams.get("redirect") || "/diagnostico";
 
   useEffect(() => {

@@ -11,13 +11,17 @@ const webhookSchema = z.object({
   }).optional(),
 });
 
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 serve(async (req) => {
-  // Server-to-server webhook - reject browser preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 405 });
   }
 
-  // Only accept POST requests for webhooks
   if (req.method !== "POST") {
     console.error(`Invalid method: ${req.method}`);
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
@@ -29,7 +33,6 @@ serve(async (req) => {
   try {
     console.log("Kiwify webhook received");
     
-    // Validate webhook token
     const url = new URL(req.url);
     const tokenParam = url.searchParams.get("token");
     const expectedToken = Deno.env.get("KIWIFY_WEBHOOK_TOKEN");
@@ -50,7 +53,6 @@ serve(async (req) => {
       });
     }
     
-    // Parse and validate request body
     const rawBody = await req.json();
     
     const validation = webhookSchema.safeParse(rawBody);
@@ -69,8 +71,6 @@ serve(async (req) => {
 
     console.log(`Order ${orderId} - Status: ${orderStatus} - Email: ${customerEmail ? "provided" : "missing"}`);
 
-    // Only process if payment is approved
-    // Kiwify statuses: paid, waiting_payment, refused, refunded, chargedback
     if (orderStatus !== "paid") {
       console.log(`Order ${orderId} not paid yet, status: ${orderStatus}`);
       return new Response(JSON.stringify({ 
@@ -90,7 +90,6 @@ serve(async (req) => {
       });
     }
 
-    // Create Supabase client with service role key to bypass RLS
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
@@ -104,43 +103,55 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Find user by email in profiles table
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("user_id")
-      .eq("email", customerEmail)
-      .single();
+    // Generate premium access token (valid for 30 days)
+    const premiumToken = generateToken();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    if (profileError || !profile) {
-      console.error(`User not found for order ${orderId}`);
-      return new Response(JSON.stringify({ 
-        error: "User not found"
-      }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
+    const { error: tokenError } = await supabase
+      .from("premium_access")
+      .insert({
+        email: customerEmail,
+        token: premiumToken,
+        order_id: orderId,
+        expires_at: expiresAt,
       });
-    }
 
-    console.log(`Found user for order ${orderId}`);
-
-    // Update subscription status to premium
-    const { error: updateError } = await supabase
-      .from("user_subscriptions")
-      .update({ 
-        status: "premium",
-        upgraded_at: new Date().toISOString()
-      })
-      .eq("user_id", profile.user_id);
-
-    if (updateError) {
-      console.error(`Error updating subscription for order ${orderId}:`, updateError.message);
-      return new Response(JSON.stringify({ error: "Failed to update subscription" }), {
+    if (tokenError) {
+      console.error(`Error creating premium access for order ${orderId}:`, tokenError.message);
+      return new Response(JSON.stringify({ error: "Failed to create premium access" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Successfully upgraded subscription for order ${orderId}`);
+    console.log(`Premium access token created for ${customerEmail} (order ${orderId})`);
+
+    // If user has an account, also upgrade subscription
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("email", customerEmail)
+      .single();
+
+    if (profile) {
+      console.log(`Found existing user for order ${orderId}, upgrading subscription`);
+
+      await supabase
+        .from("user_subscriptions")
+        .update({ 
+          status: "premium",
+          upgraded_at: new Date().toISOString()
+        })
+        .eq("user_id", profile.user_id);
+
+      // Link premium access to user
+      await supabase
+        .from("premium_access")
+        .update({ user_id: profile.user_id })
+        .eq("token", premiumToken);
+
+      console.log(`Subscription upgraded and linked for order ${orderId}`);
+    }
 
     // Send premium email notification
     try {
@@ -155,6 +166,7 @@ serve(async (req) => {
           body: JSON.stringify({
             email: customerEmail,
             order_id: orderId,
+            premium_token: premiumToken,
           }),
         }
       );
@@ -170,7 +182,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Subscription upgraded to premium"
+      message: "Premium access granted",
+      token: premiumToken,
     }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, Lightbulb, Target, TrendingUp, Download, C
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { downloadReport, downloadPdfReport, copyToClipboard } from "@/lib/exportReport";
+import { getPremiumToken } from "@/lib/premiumAccess";
 import type { FormData } from "@/pages/AcessoPremium";
 
 interface DiagnosticoResultProps {
@@ -121,6 +122,7 @@ const DiagnosticoResult = ({ isPremium = false, formData, diagnostico: propDiagn
       setError(null);
 
       try {
+        const premiumToken = getPremiumToken();
         const { data, error: fnError } = await supabase.functions.invoke("generate-diagnostico", {
           body: {
             instagram: formData.instagram,
@@ -128,6 +130,7 @@ const DiagnosticoResult = ({ isPremium = false, formData, diagnostico: propDiagn
             nicho: formData.nicho,
             objetivo: formData.objetivo,
             isPremium: true,
+            premiumToken: premiumToken || undefined,
           },
         });
 

@@ -1,11 +1,77 @@
-import { useState } from "react";
-import { Instagram, CheckCircle, Copy, Download, Sparkles, Calendar, MessageSquare, LayoutGrid, FileText, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Instagram, CheckCircle, Copy, Download, Sparkles, Calendar, MessageSquare, LayoutGrid, FileText, Star, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { getPremiumToken, setPremiumToken } from "@/lib/premiumAccess";
 
 const EntregaPremium = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [validating, setValidating] = useState(true);
+  const [valid, setValid] = useState(false);
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      setPremiumToken(token);
+    }
+
+    const storedToken = getPremiumToken();
+
+    if (!storedToken) {
+      setValidating(false);
+      setValid(false);
+      return;
+    }
+
+    supabase.functions.invoke("validate-premium-token", {
+      body: { token: storedToken },
+    }).then(({ data, error }) => {
+      if (data?.valid && !error) {
+        setValid(true);
+      } else {
+        setValid(false);
+      }
+      setValidating(false);
+    }).catch(() => {
+      setValid(false);
+      setValidating(false);
+    });
+  }, [searchParams]);
+
+  if (validating) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-instagram-pink mx-auto" />
+          <p className="text-muted-foreground">Validando acesso...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!valid) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-6">
+            <ShieldCheck className="h-10 w-10 text-destructive" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Acesso restrito
+          </h1>
+          <p className="text-muted-foreground mb-8">
+            Esta página é exclusiva para clientes premium.
+          </p>
+          <Button onClick={() => navigate("/")} className="btn-gradient">
+            Voltar para o início
+          </Button>
+        </div>
+      </main>
+    );
+  }
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
   const handleCopy = (text: string, label: string) => {

@@ -5,6 +5,7 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 const emailSchema = z.object({
   email: z.string().email(),
   order_id: z.string().optional(),
+  premium_token: z.string().optional(),
 });
 
 serve(async (req) => {
@@ -33,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    const { email, order_id } = validation.data;
+    const { email, order_id, premium_token } = validation.data;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
     if (!resendApiKey) {
@@ -105,7 +106,7 @@ serve(async (req) => {
 
       <div style="text-align: center;">
         <p>Acesse agora sua área VIP e comece a transformar seu Instagram:</p>
-        <a href="https://instarrumado.vercel.app/obrigado" class="cta-button">
+        <a href="https://instarrumado.com.br/obrigado?token=${premium_token || ''}" class="cta-button">
           Acessar Área VIP
         </a>
       </div>

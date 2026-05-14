@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const allowedOrigins = [
@@ -48,6 +49,7 @@ const inputSchema = z.object({
   nicho: z.string().min(2).max(100),
   objetivo: z.string().min(5).max(200),
   isPremium: z.boolean().optional().default(false),
+  premiumToken: z.string().optional(),
 });
 
 const tipoLabels: Record<string, string> = {
@@ -132,7 +134,7 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Equilíbrio entre conteúdo educativo, cases e bastidores",
     },
   ],
-  "Música": [
+  "Musica": [
     {
       problema: "Falta de identidade visual como artista",
       implicacao: "O público não reconhece sua marca pessoal nas redes",
@@ -180,7 +182,7 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Carrosséis com passo a passo das receitas",
     },
   ],
-  "Saúde": [
+  "Saude": [
     {
       problema: "Informação sem fonte ou embasamento",
       implicacao: "Perde credibilidade profissional",
@@ -192,7 +194,7 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Traduzir termos técnicos em benefícios práticos",
     },
   ],
-  "Educação": [
+  "Educacao": [
     {
       problema: "Conteúdo muito denso sem didática",
       implicacao: "Alunos perdem interesse rápido",
@@ -228,7 +230,7 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Dicas de composição, iluminação e edição nos posts",
     },
   ],
-  "Imobiliário": [
+  "Imobiliario": [
     {
       problema: "Fotos de imóveis sem qualidade",
       implicacao: "Imóveis parecem menos valiosos do que são",
@@ -240,7 +242,7 @@ const problemasPorNicho: Record<string, Array<{ problema: string; implicacao: st
       solucao: "Análises de mercado, dicas para compradores e tendências",
     },
   ],
-  "Política": [
+  "Politica": [
     {
       problema: "Falta de propostas claras no perfil",
       implicacao: "Eleitores não entendem seu posicionamento",
@@ -397,7 +399,60 @@ serve(async (req) => {
       });
     }
 
-    const { instagram, tipo, nicho, objetivo, isPremium } = validation.data;
+    const { instagram, tipo, nicho, objetivo, isPremium, premiumToken } = validation.data;
+
+    // If requesting premium content, validate the token
+    if (isPremium) {
+      if (!premiumToken) {
+        return new Response(JSON.stringify({ error: "Token premium necessário" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+      if (!supabaseUrl || !supabaseServiceKey) {
+        console.error("Missing Supabase configuration");
+        return new Response(JSON.stringify({ error: "Erro de configuração do servidor" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      const { data: access, error: accessError } = await supabase
+        .from("premium_access")
+        .select("id, used_at, expires_at")
+        .eq("token", premiumToken)
+        .single();
+
+      if (accessError || !access) {
+        console.error("Invalid premium token attempt:", premiumToken.substring(0, 8) + "...");
+        return new Response(JSON.stringify({ error: "Token premium inválido" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (access.expires_at && new Date(access.expires_at) < new Date()) {
+        return new Response(JSON.stringify({ error: "Token premium expirado" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Mark token as used on first premium generation
+      if (!access.used_at) {
+        await supabase
+          .from("premium_access")
+          .update({ used_at: new Date().toISOString() })
+          .eq("id", access.id);
+      }
+    }
+
     const diagnostico = gerarDiagnostico(instagram, tipo, nicho, objetivo, isPremium);
 
     return new Response(JSON.stringify({ diagnostico }), {
