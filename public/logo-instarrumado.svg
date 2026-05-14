@@ -7,22 +7,9 @@
     </linearGradient>
   </defs>
 
-  <!-- Rounded square background -->
-  <rect x="32" y="32" width="448" height="448" rx="100" ry="100" fill="url(#grad)"/>
+  <!-- Circular badge background -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#grad)" stroke-width="36"/>
 
-  <!-- Stylized "I" - camera body combined with checkmark -->
-  <!-- Camera body as the I letter shape -->
-  <rect x="148" y="148" width="216" height="168" rx="40" ry="40" fill="none" stroke="white" stroke-width="20"/>
-
-  <!-- Camera lens -->
-  <circle cx="256" cy="232" r="54" fill="none" stroke="white" stroke-width="18"/>
-
-  <!-- Camera flash dot (the dot of the "i") -->
-  <circle cx="340" cy="177" r="12" fill="white"/>
-
-  <!-- Checkmark inside the lens -->
-  <polyline points="222,245 248,268 296,218" fill="none" stroke="white" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Subtle inner glow on lens -->
-  <circle cx="256" cy="232" r="22" fill="white" opacity="0.2"/>
+  <!-- Thick checkmark -->
+  <polyline points="170,275 230,335 350,195" fill="none" stroke="url(#grad)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
